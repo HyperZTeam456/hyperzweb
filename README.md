@@ -1,6 +1,6 @@
-# hyperzweb
+# HyperZWeb
 This is HyperZWeb your hub for EVERYTHING!
-# games
-1. Tic tac toe
+# Games
+1. Tic Tac Toe
 2. Reversi
 3. Pong

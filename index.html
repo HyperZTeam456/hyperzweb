@@ -603,12 +603,12 @@
         </div>
 
         <iframe id="zweb-frame" src="about:blank"></iframe>
-    </div>
 
-    <!-- HyperZSearch page -->
-    <div id="hyperzsearch" style="display:none; padding:20px; color:white; overflow-y:auto; height:calc(100vh - 80px);">
-        <h2 style="color:#00e0ff; margin-top:0;">HyperZSearch Results</h2>
-        <div id="hyperzsearch-results"></div>
+        <!-- HyperZSearch INSIDE ZWEB -->
+        <div id="hyperzsearch" style="display:none; padding:20px; color:white; overflow-y:auto; height:calc(100vh - 80px);">
+            <h2 style="color:#00e0ff; margin-top:0;">HyperZSearch Results</h2>
+            <div id="hyperzsearch-results"></div>
+        </div>
     </div>
 
     <div id="games">
@@ -700,10 +700,11 @@
             document.getElementById("zweb").style.display = "none";
             document.getElementById("games").style.display = "none";
             document.getElementById("chatbot").style.display = "none";
-            document.getElementById("hyperzsearch").style.display = "none";
             document.getElementById(id).style.display = "block";
+
             if (id === "zweb") {
                 document.getElementById("zweb-frame").style.display = "block";
+                document.getElementById("hyperzsearch").style.display = "none";
             }
         }
 
@@ -714,7 +715,9 @@
         searchBtn.onclick = function () {
             var active = searchBtn.className.indexOf("active") === -1;
             if (active) {
-                searchBtn.className += " active";
+                if (searchBtn.className.indexOf("active") === -1) {
+                    searchBtn.className += " active";
+                }
                 if (searchPanel.className.indexOf("active") === -1) {
                     searchPanel.className += " active";
                 }

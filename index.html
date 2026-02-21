@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HyperZWeb</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --bg-main: #02030a;
+            --bg-elevated: #070a16;
+            --accent: #00b4ff;
+            --accent-soft: #00b4ff55;
+            --accent-strong: #00e0ff;
+            --border-subtle: #1a2238;
+            --text-main: #f5f7ff;
+            --text-soft: #a9b3d9;
+            --danger: #ff4b81;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #071021 0, #02030a 55%, #000 100%);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(90deg, #050816, #050816, #02030a);
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-bottom: 1px solid var(--border-subtle);
+            box-shadow: 0 10px 30px #000000aa;
+            backdrop-filter: blur(18px);
+        }
+
+        .logo-wrap {
+            position: absolute;
+            left: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: radial-gradient(circle at 30% 20%, #00e0ff, #0066ff);
+            box-shadow: 0 0 18px #00b4ffaa;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--accent-strong);
+            text-shadow: 0 0 12px #00b4ff88;
+        }
+
+        .center-wrap {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .center-buttons {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .center-buttons button {
+            background: transparent;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            color: var(--text-soft);
+            font-size: 16px;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .center-buttons button:hover {
+            color: var(--accent-strong);
+            border-color: var(--accent-soft);
+            background: #0a1020;
+            box-shadow: 0 0 12px #00b4ff44;
+        }
+
+        /* SEARCH BUTTON */
+        .search-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            border: 1px solid var(--accent-soft);
+            background: radial-gradient(circle at 30% 20%, #071427, #02030a);
+            cursor: pointer;
+
+            position: absolute;
+            top: 50%;
+            right: 32px;
+            transform: translateY(-50%);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            transition: 0.2s;
+            box-shadow: 0 0 12px #00b4ff33;
+        }
+
+        .search-btn .circle {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--accent-strong);
+            border-radius: 50%;
+        }
+
+        .search-btn .handle {
+            width: 3px;
+            height: 10px;
+            background: var(--accent-strong);
+            position: absolute;
+            transform: translate(6px, 6px) rotate(45deg);
+        }
+
+        .search-btn.active .circle {
+            width: 22px;
+            height: 2px;
+            border: none;
+            background: var(--accent-strong);
+            transform: rotate(45deg);
+        }
+
+        .search-btn.active .handle {
+            width: 22px;
+            height: 2px;
+            background: var(--accent-strong);
+            transform: rotate(-45deg);
+        }
+
+        .search-btn:hover {
+            box-shadow: 0 0 18px #00b4ff88;
+            transform: translateY(-50%) scale(1.05);
+            border-color: var(--accent-strong);
+        }
+
+        /* SEARCH PANEL */
+        .search-panel {
+            position: fixed;
+            top: 80px;
+            right: -100%;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(90deg, #050816ee, #02030aee);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            transition: 0.35s ease;
+            z-index: 20;
+            backdrop-filter: blur(18px);
+        }
+
+        .search-panel.active {
+            right: 0;
+        }
+
+        .search-panel input {
+            width: 100%;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--accent-soft);
+            background: #02030a;
+            color: var(--text-main);
+            padding: 0 18px;
+            font-size: 15px;
+            outline: none;
+            box-shadow: 0 0 0 1px #000000aa inset;
+        }
+
+        .search-panel input::placeholder {
+            color: #6f7aa5;
+        }
+
+        .search-panel input:focus {
+            border-color: var(--accent-strong);
+            box-shadow: 0 0 18px #00b4ff55;
+        }
+
+        /* MAIN LAYOUT */
+        #zweb, #games, #chatbot {
+            display: none;
+            height: calc(100vh - 80px);
+            background: radial-gradient(circle at top, #050816 0, #02030a 55%, #000 100%);
+        }
+
+        /* ZWEB */
+        #zweb {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #tabs {
+            height: 42px;
+            background: #050816;
+            border-bottom: 1px solid var(--border-subtle);
+            display:flex;
+            align-items:center;
+            padding:0 10px;
+            gap:8px;
+            overflow-x:auto;
+            white-space:nowrap;
+        }
+
+        .tab {
+            padding: 5px 12px;
+            background:#070a16;
+            border:1px solid var(--border-subtle);
+            border-radius:999px;
+            cursor:pointer;
+            color:var(--text-soft);
+            font-size: 13px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .tab.active {
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            color:#02030a;
+            border-color: transparent;
+            box-shadow: 0 0 14px #00b4ff88;
+        }
+
+        .tab .close-btn {
+            font-weight:bold;
+            cursor:pointer;
+            padding:0 4px;
+        }
+
+        .new-tab-btn {
+            padding: 5px 12px;
+            background:#0b1224;
+            color:var(--accent-strong);
+            border-radius:999px;
+            cursor:pointer;
+            font-weight:bold;
+            border:1px dashed var(--accent-soft);
+        }
+
+        #zweb-url-bar {
+            height:50px;
+            background:#050816;
+            border-bottom:1px solid var(--border-subtle);
+            display:flex;
+            align-items:center;
+            padding:0 12px;
+            gap:10px;
+        }
+
+        #zweb-url {
+            flex:1;
+            height:36px;
+            border-radius:999px;
+            border:1px solid var(--border-subtle);
+            background:#02030a;
+            color:var(--text-main);
+            padding:0 14px;
+            font-size:14px;
+            outline:none;
+        }
+
+        #zweb-url:focus {
+            border-color: var(--accent-soft);
+        }
+
+        #zweb-frame {
+            width:100%;
+            height: calc(100% - 92px);
+            border:none;
+            background:#02030a;
+        }
+
+        .btn-go {
+            height:36px;
+            padding:0 16px;
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            border:none;
+            border-radius:999px;
+            font-weight:600;
+            cursor:pointer;
+            color:#02030a;
+            box-shadow: 0 0 14px #00b4ff88;
+        }
+
+        /* GAMES SECTION */
+        #games {
+            padding: 24px 32px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .games-container {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .game-card {
+            background: radial-gradient(circle at top, #0b1024, #050816);
+            border:1px solid var(--border-subtle);
+            border-radius:18px;
+            padding:18px 18px 16px;
+            width: 260px;
+            box-shadow: 0 18px 40px #000000aa;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content:"";
+            position:absolute;
+            inset:-40%;
+            background: radial-gradient(circle at 0 0, #00b4ff33, transparent 55%);
+            opacity:0.7;
+            pointer-events:none;
+        }
+
+        .game-card h2 {
+            margin:0 0 6px;
+            color:var(--accent-strong);
+            font-size:18px;
+        }
+
+        .game-card p {
+            margin:0;
+            color:var(--text-soft);
+            font-size:13px;
+        }
+
+        .btn-small {
+            margin-top:14px;
+            padding:7px 14px;
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            border:none;
+            border-radius:999px;
+            cursor:pointer;
+            font-weight:600;
+            color:#02030a;
+            font-size:13px;
+            box-shadow: 0 0 14px #00b4ff88;
+        }
+
+        /* GAME OVERLAY */
+        #game-overlay {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 80px);
+            background: radial-gradient(circle at top, #050816f0, #02030af0);
+            display: none;
+            z-index: 25;
+            box-sizing: border-box;
+            padding: 10px 10px 16px;
+        }
+
+        #game-close {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            border: 1px solid var(--border-subtle);
+            background:#050816;
+            color:var(--text-soft);
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        .game-inner {
+            width: 100%;
+            height: 100%;
+            display:none;
+            box-sizing:border-box;
+            padding-top: 40px;
+        }
+
+        .game-header {
+            text-align:center;
+            margin-bottom:8px;
+        }
+
+        .game-header h2 {
+            margin:0;
+            font-size:22px;
+            letter-spacing:1px;
+        }
+
+        .game-options {
+            text-align:center;
+            margin-bottom:10px;
+        }
+
+        .game-options label {
+            font-size:13px;
+            color:var(--text-soft);
+            margin-right:6px;
+        }
+
+        .game-options select {
+            background:#02030a;
+            color:var(--text-main);
+            border:1px solid var(--border-subtle);
+            border-radius:999px;
+            padding:5px 10px;
+            font-size:13px;
+        }
+
+        .board {
+            display:grid;
+            gap:4px;
+            margin-top:10px;
+            justify-content:center;
+        }
+
+        .board.tictactoe {
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+        }
+
+        .board.reversi {
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(8, 40px);
+        }
+
+        .cell {
+            background:#02030a;
+            border:1px solid var(--border-subtle);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;
+            cursor:pointer;
+            border-radius:10px;
+        }
+
+        .cell.reversi-cell {
+            font-size:20px;
+        }
+
+        .status {
+            margin-top:10px;
+            min-height:20px;
+            text-align:center;
+            font-size:13px;
+            color:var(--text-soft);
+        }
+
+        /* PONG */
+        #game-pong {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+        }
+
+        #pong-canvas {
+            background:#02030a;
+            border:1px solid var(--border-subtle);
+            border-radius:18px;
+            display:block;
+            margin:0 auto;
+            box-shadow: 0 18px 40px #000000aa;
+        }
+
+        #pong-status {
+            text-align:center;
+            margin-top:10px;
+            font-size:13px;
+            color:var(--text-soft);
+        }
+
+        /* CHATBOT */
+        #chatbot {
+            display:flex;
+            flex-direction:column;
+            height:calc(100vh - 80px);
+            padding:16px 20px;
+            box-sizing:border-box;
+        }
+
+        #chat-log {
+            flex:1;
+            border-radius:18px;
+            padding:14px 14px 10px;
+            overflow-y:auto;
+            background: radial-gradient(circle at top, #050816, #02030a);
+            border:1px solid var(--border-subtle);
+            box-shadow: 0 18px 40px #000000aa inset;
+        }
+
+        .chat-msg {
+            margin-bottom:10px;
+            max-width:70%;
+            padding:8px 11px;
+            border-radius:14px;
+            font-size:13px;
+            line-height:1.4;
+            word-wrap:break-word;
+        }
+
+        .chat-msg.user {
+            margin-left:auto;
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            color:#02030a;
+            border-bottom-right-radius:4px;
+        }
+
+        .chat-msg.bot {
+            margin-right:auto;
+            background:#050816;
+            color:var(--text-main);
+            border:1px solid var(--border-subtle);
+            border-bottom-left-radius:4px;
+        }
+
+        .chat-label {
+            font-weight:600;
+            font-size:11px;
+            opacity:0.8;
+            margin-bottom:2px;
+        }
+
+        #chat-input-bar {
+            display:flex;
+            gap:10px;
+            margin-top:12px;
+        }
+
+        #chat-input {
+            flex:1;
+            height:40px;
+            border-radius:999px;
+            border:1px solid var(--border-subtle);
+            background:#02030a;
+            color:var(--text-main);
+            padding:0 14px;
+            font-size:14px;
+            outline:none;
+        }
+
+        #chat-input:focus {
+            border-color:var(--accent-soft);
+        }
+
+        #chat-send {
+            width:96px;
+            border-radius:999px;
+            border:none;
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            color:#02030a;
+            font-weight:600;
+            cursor:pointer;
+            font-size:14px;
+            box-shadow: 0 0 14px #00b4ff88;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="logo-wrap">
+            <div class="logo-icon"></div>
+            <div class="logo">HyperZWeb</div>
+        </div>
+
+        <div class="center-wrap">
+            <div class="center-buttons">
+                <button onclick="showSection('zweb')">ZWeb</button>
+                <button onclick="showSection('games')">Games</button>
+                <button onclick="showSection('chatbot')">HyperZAI</button>
+            </div>
+        </div>
+
+        <button class="search-btn" id="searchBtn">
+            <div class="circle"></div>
+            <div class="handle"></div>
+        </button>
+    </div>
+
+    <!-- SEARCH PANEL -->
+    <div class="search-panel" id="searchPanel">
+        <input type="text" placeholder="Search games or ask HyperZAI...">
+    </div>
+
+    <!-- ZWEB BROWSER -->
+    <div id="zweb">
+        <div id="tabs">
+            <div class="new-tab-btn" onclick="createTab()">+</div>
+        </div>
+
+        <div id="zweb-url-bar">
+            <input id="zweb-url" type="text" placeholder="Search or enter URL...">
+            <button class="btn-go" onclick="zwebNavigate()">Go</button>
+        </div>
+
+        <iframe id="zweb-frame" src=""></iframe>
+    </div>
+
+    <!-- GAMES SECTION -->
+    <div id="games">
+        <div class="games-container">
+            <div class="game-card">
+                <h2>Tic Tac Toe</h2>
+                <p>2 Player or Bot with multiple difficulties.</p>
+                <button class="btn-small" onclick="openGame('ttt')">Play</button>
+            </div>
+
+            <div class="game-card">
+                <h2>Reversi</h2>
+                <p>Classic Othello-style, 2P or Bot with levels.</p>
+                <button class="btn-small" onclick="openGame('rev')">Play</button>
+            </div>
+
+            <div class="game-card">
+                <h2>Pong</h2>
+                <p>2 Player or Bot, first to 10 points.</p>
+                <button class="btn-small" onclick="openGame('pong')">Play</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHATBOT -->
+    <div id="chatbot">
+        <div id="chat-log"></div>
+        <div id="chat-input-bar">
+            <input id="chat-input" type="text" placeholder="Ask HyperZAI anything, or do math...">
+            <button id="chat-send" onclick="chatSend()">Send</button>
+        </div>
+    </div>
+
+    <!-- GAME OVERLAY -->
+    <div id="game-overlay">
+        <button id="game-close" onclick="closeGame()">X</button>
+
+        <!-- TTT -->
+        <div id="game-ttt" class="game-inner">
+            <div class="game-header"><h2>Tic Tac Toe</h2></div>
+            <div class="game-options">
+                <label>Mode:</label>
+                <select id="ttt-mode">
+                    <option value="2p">2 Player</option>
+                    <option value="easy">Easy Bot</option>
+                    <option value="medium">Medium Bot</option>
+                    <option value="hard">Hard Bot</option>
+                    <option value="impossible">Impossible Bot</option>
+                </select>
+                <button class="btn-small" onclick="tttReset()">Reset</button>
+            </div>
+            <div id="ttt-board" class="board tictactoe"></div>
+            <div id="ttt-status" class="status"></div>
+        </div>
+
+        <!-- REVERSI -->
+        <div id="game-rev" class="game-inner">
+            <div class="game-header"><h2>Reversi</h2></div>
+            <div class="game-options">
+                <label>Mode:</label>
+                <select id="rev-mode">
+                    <option value="2p">2 Player</option>
+                    <option value="easy">Easy Bot</option>
+                    <option value="medium">Medium Bot</option>
+                    <option value="hard">Hard Bot</option>
+                    <option value="impossible">Impossible Bot</option>
+                </select>
+                <button class="btn-small" onclick="revReset()">Reset</button>
+            </div>
+            <div id="rev-board" class="board reversi"></div>
+            <div id="rev-status" class="status"></div>
+        </div>
+
+        <!-- PONG -->
+        <div id="game-pong" class="game-inner">
+            <div class="game-header"><h2>Pong</h2></div>
+            <div class="game-options">
+                <label>Mode:</label>
+                <select id="pong-mode">
+                    <option value="2p">2 Player</option>
+                    <option value="easy">Easy Bot</option>
+                    <option value="medium">Medium Bot</option>
+                    <option value="hard">Hard Bot</option>
+                </select>
+                <button class="btn-small" onclick="pongReset()">Reset</button>
+            </div>
+            <canvas id="pong-canvas" width="640" height="360"></canvas>
+            <div id="pong-status" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        /* SECTION SWITCHING */
+        function showSection(id) {
+            document.getElementById("zweb").style.display = "none";
+            document.getElementById("games").style.display = "none";
+            document.getElementById("chatbot").style.display = "none";
+            document.getElementById(id).style.display = "block";
+        }
+
+        /* SEARCH PANEL + BUTTON */
+        const searchBtn = document.getElementById("searchBtn");
+        const searchPanel = document.getElementById("searchPanel");
+        const searchInput = document.querySelector(".search-panel input");
+
+        searchBtn.addEventListener("click", () => {
+            const active = searchBtn.classList.toggle("active");
+            searchPanel.classList.toggle("active");
+            if (active) {
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        });
+
+        searchInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                runGlobalSearch(searchInput.value.trim());
+            }
+        });
+
+        function runGlobalSearch(q) {
+            if (!q) return;
+            q = q.toLowerCase();
+
+            searchBtn.classList.remove("active");
+            searchPanel.classList.remove("active");
+
+            if (q.includes("tic") || q.includes("toe") || q.includes("ttt")) {
+                showSection("games");
+                openGame("ttt");
+                return;
+            }
+            if (q.includes("rev") || q.includes("reversi") || q.includes("othello")) {
+                showSection("games");
+                openGame("rev");
+                return;
+            }
+            if (q.includes("pong")) {
+                showSection("games");
+                openGame("pong");
+                return;
+            }
+
+            showSection("chatbot");
+            addChatMessage(q, "user");
+            handleChat(q);
+        }
+
+        /* ZWEB BROWSER */
+        let tabs = [];
+        let currentTab = null;
+
+        function createTab(url = "New Tab") {
+            const id = Date.now();
+            const tab = { id, url };
+            tabs.push(tab);
+
+            const tabEl = document.createElement("div");
+            tabEl.className = "tab";
+            tabEl.dataset.id = id;
+
+            const title = document.createElement("span");
+            title.innerText = url;
+
+            const close = document.createElement("span");
+            close.className = "close-btn";
+            close.innerText = "×";
+            close.onclick = (e) => {
+                e.stopPropagation();
+                closeTab(id);
+            };
+
+            tabEl.appendChild(title);
+            tabEl.appendChild(close);
+
+            tabEl.onclick = () => switchTab(id);
+
+            document.getElementById("tabs").insertBefore(
+                tabEl,
+                document.querySelector(".new-tab-btn")
+            );
+
+            switchTab(id);
+        }
+
+        function switchTab(id) {
+            currentTab = tabs.find(t => t.id === id);
+
+            document.querySelectorAll(".tab").forEach(t => {
+                t.classList.toggle("active", Number(t.dataset.id) === id);
+            });
+
+            if (currentTab.url === "New Tab") {
+                document.getElementById("zweb-frame").src = "";
+                document.getElementById("zweb-url").value = "";
+            } else {
+                loadTab(currentTab.url);
+            }
+        }
+
+        function closeTab(id) {
+            const index = tabs.findIndex(t => t.id === id);
+            if (index === -1) return;
+
+            tabs.splice(index, 1);
+
+            const tabEl = document.querySelector(`.tab[data-id="${id}"]`);
+            if (tabEl) tabEl.remove();
+
+            if (currentTab && currentTab.id === id) {
+                if (tabs.length > 0) {
+                    const newIndex = Math.max(0, index - 1);
+                    switchTab(tabs[newIndex].id);
+                } else {
+                    createTab();
+                }
+            }
+        }
+
+        function loadTab(url) {
+            const frame = document.getElementById("zweb-frame");
+            const input = document.getElementById("zweb-url");
+
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = "https://" + url;
+            }
+
+            frame.src = url;
+            input.value = url;
+            currentTab.url = url;
+
+            const tabEl = document.querySelector(`.tab[data-id="${currentTab.id}"] span`);
+            if (tabEl) {
+                tabEl.innerText = url.replace(/^https?:\/\//, "").slice(0, 15) + "...";
+            }
+        }
+
+        function zwebNavigate() {
+            const url = document.getElementById("zweb-url").value.trim();
+            if (!url) return;
+
+            if (!currentTab) {
+                createTab(url);
+            } else {
+                loadTab(url);
+            }
+        }
+
+        document.getElementById("zweb-url").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                zwebNavigate();
+            }
+        });
+
+        createTab();
+        showSection('zweb');
+
+        /* GAME OVERLAY CONTROL */
+        function openGame(gameId) {
+            document.getElementById("game-overlay").style.display = "block";
+            document.getElementById("game-ttt").style.display = "none";
+            document.getElementById("game-rev").style.display = "none";
+            document.getElementById("game-pong").style.display = "none";
+
+            if (gameId === 'ttt') {
+                document.getElementById("game-ttt").style.display = "block";
+                tttReset();
+            } else if (gameId === 'rev') {
+                document.getElementById("game-rev").style.display = "block";
+                revReset();
+            } else if (gameId === 'pong') {
+                document.getElementById("game-pong").style.display = "block";
+                pongReset();
+            }
+        }
+
+        function closeGame() {
+            document.getElementById("game-overlay").style.display = "none";
+            pongStop();
+        }
+
+        /* TIC TAC TOE */
+        const tttBoardEl = document.getElementById("ttt-board");
+        const tttStatusEl = document.getElementById("ttt-status");
+        const tttModeEl = document.getElementById("ttt-mode");
+        let tttBoard, tttCurrent, tttGameOver;
+
+        function tttInitBoard() {
+            tttBoard = Array(9).fill(null);
+            tttCurrent = "X";
+            tttGameOver = false;
+            tttBoardEl.innerHTML = "";
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.onclick = () => tttClick(i);
+                tttBoardEl.appendChild(cell);
+            }
+            tttStatusEl.textContent = "X's turn";
+        }
+
+        function tttCheckWinner(b) {
+            const lines = [
+                [0,1,2],[3,4,5],[6,7,8],
+                [0,3,6],[1,4,7],[2,5,8],
+                [0,4,8],[2,4,6]
+            ];
+            for (const [a,b2,c] of lines) {
+                if (b[a] && b[a] === b[b2] && b[a] === b[c]) return b[a];
+            }
+            if (b.every(x => x)) return "draw";
+            return null;
+        }
+
+        function tttClick(i) {
+            if (tttGameOver || tttBoard[i]) return;
+            const mode = tttModeEl.value;
+            const cells = tttBoardEl.children;
+
+            tttBoard[i] = tttCurrent;
+            cells[i].textContent = tttCurrent;
+
+            let res = tttCheckWinner(tttBoard);
+            if (res) {
+                tttGameOver = true;
+                tttStatusEl.textContent = res === "draw" ? "Draw!" : res + " wins!";
+                return;
+            }
+
+            if (mode === "2p") {
+                tttCurrent = tttCurrent === "X" ? "O" : "X";
+                tttStatusEl.textContent = tttCurrent + "'s turn";
+            } else {
+                tttStatusEl.textContent = "Bot thinking...";
+                setTimeout(() => {
+                    tttBotMove(mode);
+                }, 200);
+            }
+        }
+
+        function tttFindWinningMove(player) {
+            for (let i=0;i<9;i++) {
+                if (!tttBoard[i]) {
+                    tttBoard[i] = player;
+                    if (tttCheckWinner(tttBoard) === player) {
+                        tttBoard[i] = null;
+                        return i;
+                    }
+                    tttBoard[i] = null;
+                }
+            }
+            return null;
+        }
+
+        function tttBestMoveRandomish() {
+            const center = 4;
+            if (!tttBoard[center]) return center;
+            const corners = [0,2,6,8].filter(i=>!tttBoard[i]);
+            if (corners.length) return corners[Math.floor(Math.random()*corners.length)];
+            const sides = [1,3,5,7].filter(i=>!tttBoard[i]);
+            if (sides.length) return sides[Math.floor(Math.random()*sides.length)];
+            return null;
+        }
+
+        function tttBestMoveMinimax() {
+            function minimax(board, isMax) {
+                const res = tttCheckWinner(board);
+                if (res === "O") return 10;
+                if (res === "X") return -10;
+                if (res === "draw") return 0;
+
+                if (isMax) {
+                    let best = -Infinity;
+                    for (let i=0;i<9;i++) {
+                        if (!board[i]) {
+                            board[i] = "O";
+                            best = Math.max(best, minimax(board, false));
+                            board[i] = null;
+                        }
+                    }
+                    return best;
+                } else {
+                    let best = Infinity;
+                    for (let i=0;i<9;i++) {
+                        if (!board[i]) {
+                            board[i] = "X";
+                            best = Math.min(best, minimax(board, true));
+                            board[i] = null;
+                        }
+                    }
+                    return best;
+                }
+            }
+
+            let bestVal = -Infinity;
+            let bestMove = null;
+            for (let i=0;i<9;i++) {
+                if (!tttBoard[i]) {
+                    tttBoard[i] = "O";
+                    const moveVal = minimax(tttBoard, false);
+                    tttBoard[i] = null;
+                    if (moveVal > bestVal) {
+                        bestVal = moveVal;
+                        bestMove = i;
+                    }
+                }
+            }
+            return bestMove;
+        }
+
+        function tttBotMove(mode) {
+            if (tttGameOver) return;
+            const cells = tttBoardEl.children;
+
+            let move;
+            const empties = tttBoard.map((v,i)=>v?null:i).filter(v=>v!==null);
+
+            if (mode === "easy") {
+                move = empties[Math.floor(Math.random()*empties.length)];
+            } else if (mode === "medium") {
+                move = tttFindWinningMove("O") ?? tttFindWinningMove("X") ?? empties[Math.floor(Math.random()*empties.length)];
+            } else if (mode === "hard") {
+                move = tttFindWinningMove("O") ?? tttFindWinningMove("X") ?? tttBestMoveRandomish();
+            } else {
+                move = tttBestMoveMinimax();
+            }
+
+            tttBoard[move] = "O";
+            cells[move].textContent = "O";
+
+            let res = tttCheckWinner(tttBoard);
+            if (res) {
+                tttGameOver = true;
+                tttStatusEl.textContent = res === "draw" ? "Draw!" : res + " wins!";
+                return;
+            }
+            tttStatusEl.textContent = "Your turn";
+        }
+
+        function tttReset() {
+            tttInitBoard();
+        }
+
+        tttInitBoard();
+
+        /* REVERSI */
+        const revBoardEl = document.getElementById("rev-board");
+        const revStatusEl = document.getElementById("rev-status");
+        const revModeEl = document.getElementById("rev-mode");
+        let revBoard, revCurrent, revGameOver;
+        let revLastMove = null;
+        let revLastFlipped = [];
+        let revAnimating = false;
+
+        function revInitBoard() {
+            revBoard = Array(8).fill(null).map(()=>Array(8).fill(null));
+            revCurrent = "B"; // B = Black, W = White
+            revGameOver = false;
+            revBoard[3][3] = "W";
+            revBoard[3][4] = "B";
+            revBoard[4][3] = "B";
+            revBoard[4][4] = "W";
+            revLastMove = null;
+            revLastFlipped = [];
+            revRender();
+            revStatusEl.textContent = "Black (○) to move";
+        }
+
+        function revRender() {
+            revBoardEl.innerHTML = "";
+            for (let r=0;r<8;r++) {
+                for (let c=0;c<8;c++) {
+                    const cell = document.createElement("div");
+                    cell.className = "cell reversi-cell";
+                    cell.onclick = () => revClick(r,c);
+                    const v = revBoard[r][c];
+                    // B = Black = ○, W = White = ● (swapped mapping)
+                    if (v === "B") cell.textContent = "○";
+                    else if (v === "W") cell.textContent = "●";
+                    revBoardEl.appendChild(cell);
+                }
+            }
+
+            if (revLastMove) {
+                const idx = revLastMove.r * 8 + revLastMove.c;
+                revBoardEl.children[idx].style.background = "#0044aa";
+            }
+
+            for (const [r,c] of revLastFlipped) {
+                const idx = r * 8 + c;
+                revBoardEl.children[idx].style.background = "#006600";
+            }
+        }
+
+        function revInBounds(r,c) {
+            return r>=0 && r<8 && c>=0 && c<8;
+        }
+
+        function revGetFlips(r,c,player, board = revBoard) {
+            const opp = player === "B" ? "W" : "B";
+            const flips = [];
+            if (board[r][c]) return flips;
+            for (let dr=-1;dr<=1;dr++) {
+                for (let dc=-1;dc<=1;dc++) {
+                    if (dr===0 && dc===0) continue;
+                    let rr=r+dr, cc=c+dc;
+                    const line = [];
+                    while (revInBounds(rr,cc) && board[rr][cc]===opp) {
+                        line.push([rr,cc]);
+                        rr+=dr; cc+=dc;
+                    }
+                    if (line.length && revInBounds(rr,cc) && board[rr][cc]===player) {
+                        flips.push(...line);
+                    }
+                }
+            }
+            return flips;
+        }
+
+        function revValidMoves(player, board = revBoard) {
+            const moves = [];
+            for (let r=0;r<8;r++) {
+                for (let c=0;c<8;c++) {
+                    const flips = revGetFlips(r,c,player, board);
+                    if (flips.length) moves.push([r,c]);
+                }
+            }
+            return moves;
+        }
+
+        function revApplyMove(r,c,player, board) {
+            const flips = revGetFlips(r,c,player, board);
+            if (!flips.length) return null;
+            board[r][c] = player;
+            for (const [fr,fc] of flips) {
+                board[fr][fc] = player;
+            }
+            return flips;
+        }
+
+        function revClick(r,c) {
+            if (revGameOver || revAnimating) return;
+            const mode = revModeEl.value;
+            const flips = revGetFlips(r,c,revCurrent);
+            if (!flips.length) return;
+
+            revAnimating = true;
+            revPlayMoveAnimated(r,c,revCurrent,flips, () => {
+                revAnimating = false;
+                revNextTurn(mode);
+            });
+        }
+
+        function revPlayMoveAnimated(r,c,player,flips,done) {
+            revBoard[r][c] = player;
+            revLastMove = { r, c, player };
+            revLastFlipped = [];
+            revRender();
+
+            let i = 0;
+            function step() {
+                if (i < flips.length) {
+                    const [fr,fc] = flips[i++];
+                    revBoard[fr][fc] = player;
+                    revLastFlipped = flips.slice(0,i);
+                    revRender();
+                    setTimeout(step,40);
+                } else {
+                    revLastFlipped = flips;
+                    revRender();
+                    setTimeout(done,500);
+                }
+            }
+            step();
+        }
+
+        function revNextTurn(mode) {
+            if (revGameOver) return;
+
+            const currentMoves = revValidMoves(revCurrent);
+            const otherPlayer = revCurrent === "B" ? "W" : "B";
+            const otherMoves = revValidMoves(otherPlayer);
+
+            if (currentMoves.length === 0 && otherMoves.length === 0) {
+                revGameOver = true;
+
+                let b = 0, w = 0;
+                for (let r = 0; r < 8; r++) {
+                    for (let c = 0; c < 8; c++) {
+                        if (revBoard[r][c] === "B") b++;
+                        if (revBoard[r][c] === "W") w++;
+                    }
+                }
+
+                if (b > w) revStatusEl.textContent = `Black (○) wins ${b} - ${w}`;
+                else if (w > b) revStatusEl.textContent = `White (●) wins ${w} - ${b}`;
+                else revStatusEl.textContent = `Draw ${b} - ${w}`;
+
+                revRender();
+                return;
+            }
+
+            if (currentMoves.length === 0 && otherMoves.length > 0) {
+                revCurrent = otherPlayer;
+                revStatusEl.textContent =
+                    `${revCurrent === "B" ? "Black (○)" : "White (●)"} to move (other player had no moves)`;
+
+                revRender();
+
+                if (mode !== "2p" && revCurrent === "W") {
+                    setTimeout(() => revBotMove(mode), 500);
+                }
+                return;
+            }
+
+            revCurrent = otherPlayer;
+            revStatusEl.textContent =
+                `${revCurrent === "B" ? "Black (○)" : "White (●)"} to move`;
+
+            if (revLastMove) {
+                revStatusEl.innerHTML =
+                    `${revLastMove.player === "B" ? "Black (○)" : "White (●)"} played <b>${revLastMove.r + 1},${revLastMove.c + 1}</b><br>` +
+                    `Flipped: ${revLastFlipped.length}`;
+            }
+
+            revRender();
+
+            if (mode !== "2p" && revCurrent === "W") {
+                setTimeout(() => revBotMove(mode), 500);
+            }
+        }
+
+        function revBotMove(mode) {
+            if (revGameOver || revAnimating) return;
+            const move = revBotChooseMove(mode,"W");
+            if (!move) {
+                revNextTurn(mode);
+                return;
+            }
+            const [r,c] = move;
+            const flips = revGetFlips(r,c,"W");
+            if (!flips.length) {
+                revNextTurn(mode);
+                return;
+            }
+            revAnimating = true;
+            revPlayMoveAnimated(r,c,"W",flips, () => {
+                revAnimating = false;
+                revNextTurn(mode);
+            });
+        }
+
+        function revBotChooseMove(mode, player) {
+            const moves = revValidMoves(player);
+            if (!moves.length) return null;
+
+            if (mode === "easy") {
+                return moves[Math.floor(Math.random()*moves.length)];
+            }
+
+            if (mode === "medium") {
+                let best = null, bestScore = -Infinity;
+                for (const [r,c] of moves) {
+                    const flips = revGetFlips(r,c,player);
+                    if (flips.length > bestScore) {
+                        bestScore = flips.length;
+                        best = [r,c];
+                    }
+                }
+                return best;
+            }
+
+            if (mode === "hard") {
+                let best = null, bestScore = Infinity;
+                for (const [r,c] of moves) {
+                    const boardCopy = revCopyBoard(revBoard);
+                    revApplyMove(r,c,player,boardCopy);
+                    const opp = player === "B" ? "W" : "B";
+                    const oppMoves = revValidMoves(opp,boardCopy).length;
+                    if (oppMoves < bestScore) {
+                        bestScore = oppMoves;
+                        best = [r,c];
+                    }
+                }
+                return best;
+            }
+
+            const depth = 3;
+            const opp = player === "B" ? "W" : "B";
+
+            function scoreBoard(board) {
+                let b=0,w=0;
+                for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+                    if (board[r][c]==="B") b++;
+                    if (board[r][c]==="W") w++;
+                }
+                return (player==="B" ? b-w : w-b);
+            }
+
+            function minimax(board, curPlayer, d, alpha, beta) {
+                if (d === 0) return scoreBoard(board);
+                const curMoves = revValidMoves(curPlayer,board);
+                if (!curMoves.length) return scoreBoard(board);
+
+                if (curPlayer === player) {
+                    let best = -Infinity;
+                    for (const [r,c] of curMoves) {
+                        const copy = revCopyBoard(board);
+                        revApplyMove(r,c,curPlayer,copy);
+                        const val = minimax(copy, opp, d-1, alpha, beta);
+                        best = Math.max(best,val);
+                        alpha = Math.max(alpha,val);
+                        if (beta <= alpha) break;
+                    }
+                    return best;
+                } else {
+                    let best = Infinity;
+                    for (const [r,c] of curMoves) {
+                        const copy = revCopyBoard(board);
+                        revApplyMove(r,c,curPlayer,copy);
+                        const val = minimax(copy, player, d-1, alpha, beta);
+                        best = Math.min(best,val);
+                        beta = Math.min(beta,val);
+                        if (beta <= alpha) break;
+                    }
+                    return best;
+                }
+            }
+
+            let bestMove = null;
+            let bestVal = -Infinity;
+            for (const [r,c] of moves) {
+                const copy = revCopyBoard(revBoard);
+                revApplyMove(r,c,player,copy);
+                const val = minimax(copy, opp, depth-1, -Infinity, Infinity);
+                if (val > bestVal) {
+                    bestVal = val;
+                    bestMove = [r,c];
+                }
+            }
+            return bestMove || moves[0];
+        }
+
+        function revCopyBoard(board) {
+            return board.map(row => row.slice());
+        }
+
+        function revReset() {
+            revInitBoard();
+        }
+
+        revInitBoard();
+
+        /* PONG */
+        const pongCanvas = document.getElementById("pong-canvas");
+        const pongCtx = pongCanvas.getContext("2d");
+        const pongStatusEl = document.getElementById("pong-status");
+        const pongModeEl = document.getElementById("pong-mode");
+
+        let pongBall, pongLeft, pongRight;
+        let pongKeys = {};
+        let pongRunning = false;
+        let pongTimer = null;
+        let leftScore = 0;
+        let rightScore = 0;
+
+        function pongInit() {
+            pongBall = {
+                x: pongCanvas.width/2,
+                y: pongCanvas.height/2,
+                vx: 3,
+                vy: 2.5,
+                r: 6
+            };
+            pongLeft = { x: 20, y: pongCanvas.height/2 - 40, w: 10, h: 80 };
+            pongRight = { x: pongCanvas.width-30, y: pongCanvas.height/2 - 40, w: 10, h: 80 };
+            leftScore = 0;
+            rightScore = 0;
+            pongStatusEl.textContent = `${leftScore} | ${rightScore} (first to 10)`;
+        }
+
+        function pongReset() {
+            pongInit();
+            pongRunning = true;
+            if (pongTimer) clearInterval(pongTimer);
+            pongTimer = setInterval(pongLoop, 1000/120);
+        }
+
+        function pongStop() {
+            pongRunning = false;
+            if (pongTimer) {
+                clearInterval(pongTimer);
+                pongTimer = null;
+            }
+        }
+
+        function resetBall(direction = 1) {
+            pongBall.x = pongCanvas.width/2;
+            pongBall.y = pongCanvas.height/2;
+            pongBall.vx = 3 * direction;
+            pongBall.vy = (Math.random() > 0.5 ? 1 : -1) * 2.5;
+        }
+
+        window.addEventListener("keydown", e => { pongKeys[e.key] = true; });
+        window.addEventListener("keyup", e => { pongKeys[e.key] = false; });
+
+        function pongUpdate() {
+            if (!pongRunning) return;
+
+            const mode = pongModeEl.value;
+
+            if (pongKeys["w"]) pongLeft.y -= 4;
+            if (pongKeys["s"]) pongLeft.y += 4;
+
+            if (mode === "2p") {
+                if (pongKeys["ArrowUp"]) pongRight.y -= 4;
+                if (pongKeys["ArrowDown"]) pongRight.y += 4;
+            } else {
+                let speed = mode === "easy" ? 2 : mode === "medium" ? 3 : 4;
+                if (pongBall.y < pongRight.y + pongRight.h/2) pongRight.y -= speed;
+                else pongRight.y += speed;
+            }
+
+            pongLeft.y = Math.max(0, Math.min(pongCanvas.height - pongLeft.h, pongLeft.y));
+            pongRight.y = Math.max(0, Math.min(pongCanvas.height - pongRight.h, pongRight.y));
+
+            pongBall.x += pongBall.vx;
+            pongBall.y += pongBall.vy;
+
+            if (pongBall.y - pongBall.r < 0 || pongBall.y + pongBall.r > pongCanvas.height) {
+                pongBall.vy *= -1;
+            }
+
+            if (pongBall.x - pongBall.r < pongLeft.x + pongLeft.w &&
+                pongBall.y > pongLeft.y && pongBall.y < pongLeft.y + pongLeft.h) {
+                pongBall.vx = Math.abs(pongBall.vx);
+            }
+
+            if (pongBall.x + pongBall.r > pongRight.x &&
+                pongBall.y > pongRight.y && pongBall.y < pongRight.y + pongRight.h) {
+                pongBall.vx = -Math.abs(pongBall.vx);
+            }
+
+            if (pongBall.x < 0) {
+                rightScore++;
+                if (rightScore >= 10) {
+                    pongStatusEl.textContent = `${leftScore} | ${rightScore} — Right wins!`;
+                    pongStop();
+                } else {
+                    resetBall(1);
+                    pongStatusEl.textContent = `${leftScore} | ${rightScore} (first to 10)`;
+                }
+            } else if (pongBall.x > pongCanvas.width) {
+                leftScore++;
+                if (leftScore >= 10) {
+                    pongStatusEl.textContent = `${leftScore} | ${rightScore} — Left wins!`;
+                    pongStop();
+                } else {
+                    resetBall(-1);
+                    pongStatusEl.textContent = `${leftScore} | ${rightScore} (first to 10)`;
+                }
+            }
+        }
+
+        function pongDraw() {
+            pongCtx.clearRect(0,0,pongCanvas.width,pongCanvas.height);
+            pongCtx.fillStyle = "#00b4ff";
+            pongCtx.fillRect(pongLeft.x, pongLeft.y, pongLeft.w, pongLeft.h);
+            pongCtx.fillRect(pongRight.x, pongRight.y, pongRight.w, pongRight.h);
+            pongCtx.beginPath();
+            pongCtx.arc(pongBall.x, pongBall.y, pongBall.r, 0, Math.PI*2);
+            pongCtx.fill();
+
+            pongCtx.fillStyle = "#00b4ff";
+            pongCtx.font = "16px Segoe UI";
+            pongCtx.fillText(`${leftScore} | ${rightScore}`, pongCanvas.width/2 - 30, 20);
+        }
+
+        function pongLoop() {
+            pongUpdate();
+            pongDraw();
+        }
+
+        pongInit();
+
+        /* HYPERZAI CHATBOT */
+        const chatLog = document.getElementById("chat-log");
+        const chatInput = document.getElementById("chat-input");
+
+        chatInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") chatSend();
+        });
+
+        function addChatMessage(text, who) {
+            const wrapper = document.createElement("div");
+            const label = document.createElement("div");
+            const bubble = document.createElement("div");
+
+            wrapper.style.display = "flex";
+            wrapper.style.flexDirection = "column";
+            wrapper.style.marginBottom = "6px";
+
+            label.className = "chat-label";
+            bubble.className = "chat-msg " + who;
+
+            if (who === "user") {
+                wrapper.style.alignItems = "flex-end";
+                label.textContent = "You";
+            } else {
+                wrapper.style.alignItems = "flex-start";
+                label.textContent = "HyperZAI";
+            }
+
+            bubble.textContent = text;
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(bubble);
+            chatLog.appendChild(wrapper);
+
+            // force auto-scroll even when chat is taller than viewport
+            requestAnimationFrame(() => {
+                chatLog.scrollTop = chatLog.scrollHeight;
+            });
+        }
+
+        function chatSend() {
+            const q = chatInput.value.trim();
+            if (!q) return;
+            chatInput.value = "";
+            addChatMessage(q, "user");
+            handleChat(q);
+        }
+
+        function handleChat(q) {
+            if (looksLikeMath(q)) {
+                try {
+                    const res = evalMathExpression(q);
+                    addChatMessage(String(res), "bot");
+                } catch (e) {
+                    addChatMessage("Math error: " + e.message, "bot");
+                }
+            } else {
+                fetchWikipedia(q);
+            }
+        }
+
+        function looksLikeMath(q) {
+            if (/[Σσ]/.test(q)) return true;
+            if (/factorial|fib|fibonacci/i.test(q)) return true;
+            if (/[0-9]/.test(q) && /[+\-*/^!]/.test(q)) return true;
+            if (/sqrt|cos|sin|tan|log|ln/i.test(q)) return true;
+            return false;
+        }
+
+        function evalMathExpression(expr) {
+            expr = expr.replace(/\s+/g,"");
+
+            expr = expr.replace(/Σ\(([^,]+),([^,]+),([^,]+)\)/gi,
+                (_, from, to, body) => `sigma(${from},${to},(${body}))`);
+
+            expr = expr.replace(/Σ_?([a-zA-Z])=([^^]+)\^([^()]+)\(([^)]+)\)/g,
+                (_, v, from, to, body) => `sigma(${from},${to},(${body}))`);
+
+            expr = expr.replace(/fib\(([^)]+)\)/gi, "fib($1)");
+            expr = expr.replace(/fibonacci\(([^)]+)\)/gi, "fib($1)");
+
+            expr = expr.replace(/([0-9]+)!/g, "fact($1)");
+
+            const hasDecimal = /[0-9]*\.[0-9]+/.test(expr);
+            const hasNonIntOps = /sqrt|cos|sin|tan|log|ln/i.test(expr);
+
+            function fact(n) {
+                n = BigInt(n);
+                if (n < 0n) throw new Error("factorial of negative");
+                let r = 1n;
+                for (let i=2n;i<=n;i++) r *= i;
+                return r;
+            }
+
+            function fib(n) {
+                n = BigInt(n);
+                if (n < 0n) throw new Error("fib of negative");
+                let a=0n,b=1n;
+                for (let i=0n;i<n;i++){ [a,b]=[b,a+b]; }
+                return a;
+            }
+
+            function sigma(from,to,bodyFnVar) {
+                const f = BigInt(from);
+                const t = BigInt(to);
+                if (hasDecimal || hasNonIntOps) {
+                    let sum = 0;
+                    for (let i = Number(f); i <= Number(t); i++) {
+                        const body = bodyFnVar.toString();
+                        const replaced = body.replace(/([a-zA-Z])/g, i);
+                        sum += Number(Function("return " + replaced)());
+                    }
+                    return sum;
+                } else {
+                    let sum = 0n;
+                    for (let i=f;i<=t;i++) {
+                        const body = bodyFnVar.toString();
+                        const replaced = body.replace(/([a-zA-Z])/g, i.toString());
+                        const val = BigInt(Function("return " + replaced)());
+                        sum += val;
+                    }
+                    return sum;
+                }
+            }
+
+            if (!hasDecimal && !hasNonIntOps && !/[eE]/.test(expr)) {
+                const safe = expr
+                    .replace(/\^/g,"**")
+                    .replace(/([0-9]+)/g,"$1n");
+                const fn = Function("fact","fib","sigma","return " + safe);
+                return fn(fact,fib,sigma);
+            } else {
+                const safe = expr
+                    .replace(/\^/g,"**")
+                    .replace(/ln\(/gi,"Math.log(")
+                    .replace(/log\(/gi,"Math.log10(")
+                    .replace(/sqrt\(/gi,"Math.sqrt(")
+                    .replace(/cos\(/gi,"Math.cos(")
+                    .replace(/sin\(/gi,"Math.sin(")
+                    .replace(/tan\(/gi,"Math.tan(");
+                const fn = Function("fact","fib","sigma","return " + safe);
+                return fn(fact,fib,sigma);
+            }
+        }
+
+        function fetchWikipedia(q) {
+            const title = encodeURIComponent(q.replace(/^what\s+is\s+/i,"").trim());
+            const url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + title;
+
+            fetch(url)
+                .then(r => {
+                    if (!r.ok) throw new Error("No article found");
+                    return r.json();
+                })
+                .then(data => {
+                    if (data.extract) {
+                        addChatMessage(data.extract, "bot");
+                    } else {
+                        addChatMessage("No summary available for that topic.", "bot");
+                    }
+                })
+                .catch(err => {
+                    addChatMessage("Wikipedia error: " + err.message, "bot");
+                });
+        }
+    </script>
+</body>
+</html>

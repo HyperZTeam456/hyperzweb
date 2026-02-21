@@ -1,29 +1,1982 @@
-/* CSS for centering the snake canvas */
-#game-snake {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    margin: 0 auto;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HyperZWeb</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.game-inner {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100%;
-    margin: 0 auto;
-}
+    <style>
+        :root {
+            --bg-main: #02030a;
+            --bg-elevated: #070a16;
+            --accent: #00b4ff;
+            --accent-soft: #00b4ff55;
+            --accent-strong: #00e0ff;
+            --border-subtle: #1a2238;
+            --text-main: #f5f7ff;
+            --text-soft: #a9b3d9;
+            --danger: #ff4b81;
+        }
 
-/* CSS for centering the minesweeper canvas */
-#game-minesweeper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    margin: 0 auto;
-}
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #071021 0, #02030a 55%, #000 100%);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        .topbar {
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(90deg, #050816, #050816, #02030a);
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-bottom: 1px solid var(--border-subtle);
+            box-shadow: 0 10px 30px #000000aa;
+        }
+
+        .logo-wrap {
+            position: absolute;
+            left: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: radial-gradient(circle at 30% 20%, #00e0ff, #0066ff);
+            box-shadow: 0 0 18px #00b4ffaa;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--accent-strong);
+            text-shadow: 0 0 12px #00b4ff88;
+        }
+
+        .center-wrap {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .center-buttons {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .center-buttons button {
+            background: transparent;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            color: var(--text-soft);
+            font-size: 16px;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .center-buttons button:hover {
+            color: var(--accent-strong);
+            border-color: var(--accent-soft);
+            background: #0a1020;
+            box-shadow: 0 0 12px #00b4ff44;
+        }
+
+        .search-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            border: 1px solid var(--accent-soft);
+            background: radial-gradient(circle at 30% 20%, #071427, #02030a);
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            right: 32px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            box-shadow: 0 0 12px #00b4ff33;
+        }
+
+        .search-btn .circle {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--accent-strong);
+            border-radius: 50%;
+        }
+
+        .search-btn .handle {
+            width: 3px;
+            height: 10px;
+            background: var(--accent-strong);
+            position: absolute;
+            transform: translate(6px, 6px) rotate(45deg);
+        }
+
+        .search-btn.active .circle {
+            width: 22px;
+            height: 2px;
+            border: none;
+            background: var(--accent-strong);
+            transform: rotate(45deg);
+        }
+
+        .search-btn.active .handle {
+            width: 22px;
+            height: 2px;
+            background: var(--accent-strong);
+            transform: rotate(-45deg);
+        }
+
+        .search-btn:hover {
+            box-shadow: 0 0 18px #00b4ff88;
+            transform: translateY(-50%) scale(1.05);
+            border-color: var(--accent-strong);
+        }
+
+        .search-panel {
+            position: fixed;
+            top: 80px;
+            right: -100%;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(90deg, #050816ee, #02030aee);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            transition: 0.35s ease;
+            z-index: 20;
+        }
+
+        .search-panel.active {
+            right: 0;
+        }
+
+        .search-panel input {
+            width: 100%;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--accent-soft);
+            background: #02030a;
+            color: var(--text-main);
+            padding: 0 18px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-panel input::placeholder {
+            color: #6f7aa5;
+        }
+
+        .search-panel input:focus {
+            border-color: var(--accent-strong);
+            box-shadow: 0 0 18px #00b4ff55;
+        }
+
+        #zweb, #games, #chatbot {
+            display: none;
+            height: calc(100vh - 80px);
+            background: radial-gradient(circle at top, #050816 0, #02030a 55%, #000 100%);
+        }
+
+        #zweb {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #tabs {
+            height: 42px;
+            background: #050816;
+            border-bottom: 1px solid var(--border-subtle);
+            display:flex;
+            align-items:center;
+            padding:0 10px;
+            overflow-x:auto;
+            white-space:nowrap;
+        }
+
+        .tab {
+            padding: 5px 12px;
+            background:#070a16;
+            border:1px solid var(--border-subtle);
+            border-radius:999px;
+            cursor:pointer;
+            color:var(--text-soft);
+            font-size: 13px;
+            display:inline-flex;
+            align-items:center;
+            margin-right:8px;
+        }
+
+        .tab.active {
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            color:#02030a;
+            border-color: transparent;
+            box-shadow: 0 0 14px #00b4ff88;
+        }
+
+        .tab .close-btn {
+            font-weight:bold;
+            cursor:pointer;
+            padding:0 4px;
+            margin-left:6px;
+        }
+
+        .new-tab-btn {
+            padding: 5px 12px;
+            background:#0b1224;
+            color:var(--accent-strong);
+            border-radius:999px;
+            cursor:pointer;
+            font-weight:bold;
+            border:1px dashed var(--accent-soft);
+            display:inline-block;
+        }
+
+        #zweb-url-bar {
+            height:50px;
+            background:#050816;
+            border-bottom:1px solid var(--border-subtle);
+            display:flex;
+            align-items:center;
+            padding:0 12px;
+            gap:10px;
+        }
+
+        #zweb-url {
+            flex:1;
+            height:36px;
+            border-radius:999px;
+            border:1px solid var(--border-subtle);
+            background:#02030a;
+            color:var(--text-main);
+            padding:0 14px;
+            font-size:14px;
+            outline:none;
+        }
+
+        #zweb-url:focus {
+            border-color: var(--accent-soft);
+        }
+
+        #zweb-frame {
+            width:100%;
+            height: calc(100% - 92px);
+            border:none;
+            background:#02030a;
+        }
+
+        .btn-go {
+            height:36px;
+            padding:0 16px;
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            border:none;
+            border-radius:999px;
+            font-weight:600;
+            cursor:pointer;
+            color:#02030a;
+            box-shadow: 0 0 14px #00b4ff88;
+        }
+
+        #games {
+            padding: 24px 32px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .games-container {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .game-card {
+            background: radial-gradient(circle at top, #0b1024, #050816);
+            border:1px solid var(--border-subtle);
+            border-radius:18px;
+            padding:18px 18px 16px;
+            width: 260px;
+            box-shadow: 0 18px 40px #000000aa;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content:"";
+            position:absolute;
+            inset:-40%;
+            background: radial-gradient(circle at 0 0, #00b4ff33, transparent 55%);
+            opacity:0.7;
+            pointer-events:none;
+        }
+
+        .game-card h2 {
+            margin:0 0 6px;
+            color:var(--accent-strong);
+            font-size:18px;
+        }
+
+        .game-card p {
+            margin:0;
+            color:var(--text-soft);
+            font-size:13px;
+        }
+
+        .btn-small {
+            margin-top:14px;
+            padding:7px 14px;
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            border:none;
+            border-radius:999px;
+            cursor:pointer;
+            font-weight:600;
+            color:#02030a;
+            font-size:13px;
+            box-shadow: 0 0 14px #00b4ff88;
+        }
+
+        #game-overlay {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 80px);
+            background: radial-gradient(circle at top, #050816f0, #02030af0);
+            display: none;
+            z-index: 25;
+            box-sizing: border-box;
+            padding: 10px 10px 16px;
+        }
+
+        #game-close {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            border: 1px solid var(--border-subtle);
+            background:#050816;
+            color:var(--text-soft);
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        .game-inner {
+            width: 100%;
+            height: 100%;
+            display:none;
+            box-sizing:border-box;
+            padding-top: 40px;
+        }
+
+        .game-header {
+            text-align:center;
+            margin-bottom:8px;
+        }
+
+        .game-header h2 {
+            margin:0;
+            font-size:22px;
+            letter-spacing:1px;
+        }
+
+        .game-options {
+            text-align:center;
+            margin-bottom:10px;
+        }
+
+        .game-options label {
+            font-size:13px;
+            color:var(--text-soft);
+            margin-right:6px;
+        }
+
+        .game-options select {
+            background:#02030a;
+            color:var(--text-main);
+            border:1px solid var(--border-subtle);
+            border-radius:999px;
+            padding:5px 10px;
+            font-size:13px;
+        }
+
+        .board {
+            display:grid;
+            gap:4px;
+            margin-top:10px;
+            justify-content:center;
+        }
+
+        .board.tictactoe {
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+        }
+
+        .board.reversi {
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(8, 40px);
+        }
+
+        .cell {
+            background:#02030a;
+            border:1px solid var(--border-subtle);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;
+            cursor:pointer;
+            border-radius:10px;
+        }
+
+        .cell.reversi-cell {
+            font-size:20px;
+        }
+
+        .status {
+            margin-top:10px;
+            min-height:20px;
+            text-align:center;
+            font-size:13px;
+            color:var(--text-soft);
+        }
+
+        #game-pong {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+        }
+
+        #pong-canvas {
+            background:#02030a;
+            border:1px solid var(--border-subtle);
+            border-radius:18px;
+            display:block;
+            margin:0 auto;
+            box-shadow: 0 18px 40px #000000aa;
+        }
+
+        #pong-status {
+            text-align:center;
+            margin-top:10px;
+            font-size:13px;
+            color:var(--text-soft);
+        }
+
+        #chatbot {
+            display:flex;
+            flex-direction:column;
+            height:calc(100vh - 80px);
+            padding:16px 20px;
+            box-sizing:border-box;
+        }
+
+        #chat-log {
+            flex:1;
+            border-radius:18px;
+            padding:14px 14px 10px;
+            overflow-y:auto;
+            background: radial-gradient(circle at top, #050816, #02030a);
+            border:1px solid var(--border-subtle);
+            box-shadow: 0 18px 40px #000000aa inset;
+        }
+
+        .chat-msg {
+            margin-bottom:10px;
+            max-width:70%;
+            padding:8px 11px;
+            border-radius:14px;
+            font-size:13px;
+            line-height:1.4;
+            word-wrap:break-word;
+        }
+
+        .chat-msg.user {
+            margin-left:auto;
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            color:#02030a;
+            border-bottom-right-radius:4px;
+        }
+
+        .chat-msg.bot {
+            margin-right:auto;
+            background:#050816;
+            color:var(--text-main);
+            border:1px solid var(--border-subtle);
+            border-bottom-left-radius:4px;
+        }
+
+        .chat-label {
+            font-weight:600;
+            font-size:11px;
+            opacity:0.8;
+            margin-bottom:2px;
+        }
+
+        #chat-input-bar {
+            display:flex;
+            gap:10px;
+            margin-top:12px;
+        }
+
+        #chat-input {
+            flex:1;
+            height:40px;
+            border-radius:999px;
+            border:1px solid var(--border-subtle);
+            background:#02030a;
+            color:var(--text-main);
+            padding:0 14px;
+            font-size:14px;
+            outline:none;
+        }
+
+        #chat-input:focus {
+            border-color:var(--accent-soft);
+        }
+
+        #chat-send {
+            width:96px;
+            border-radius:999px;
+            border:none;
+            background: radial-gradient(circle at 30% 0, #00e0ff, #0066ff);
+            color:#02030a;
+            font-weight:600;
+            cursor:pointer;
+            font-size:14px;
+            box-shadow: 0 0 14px #00b4ff88;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <div class="logo-wrap">
+            <div class="logo-icon"></div>
+            <div class="logo">HyperZWeb</div>
+        </div>
+
+        <div class="center-wrap">
+            <div class="center-buttons">
+                <button onclick="showSection('zweb')">ZWeb</button>
+                <button onclick="showSection('games')">Games</button>
+                <button onclick="showSection('chatbot')">HyperZAI</button>
+            </div>
+        </div>
+
+        <button class="search-btn" id="searchBtn">
+            <div class="circle"></div>
+            <div class="handle"></div>
+        </button>
+    </div>
+
+    <div class="search-panel" id="searchPanel">
+        <input type="text" id="searchInput" placeholder="Search games or ask HyperZAI...">
+    </div>
+
+    <div id="zweb">
+        <div id="tabs">
+            <div class="new-tab-btn" onclick="createTab()">+</div>
+        </div>
+
+        <div id="zweb-url-bar">
+            <input id="zweb-url" type="text" placeholder="Search or enter URL...">
+            <button class="btn-go" onclick="zwebNavigate()">Go</button>
+        </div>
+
+        <iframe id="zweb-frame" src="about:blank"></iframe>
+
+        <div id="hyperzsearch" style="display:none; padding:20px; color:white; overflow-y:auto; height:calc(100vh - 80px);">
+            <h2 style="color:#00e0ff; margin-top:0;">HyperZSearch Results</h2>
+            <div id="hyperzsearch-results"></div>
+        </div>
+    </div>
+
+    <div id="games">
+        <div class="games-container">
+            <div class="game-card">
+                <h2>Tic Tac Toe</h2>
+                <p>2 Player or Bot with multiple difficulties.</p>
+                <button class="btn-small" onclick="openGame('ttt')">Play</button>
+            </div>
+
+            <div class="game-card">
+                <h2>Reversi</h2>
+                <p>Classic Othello-style, 2P or Bot with levels.</p>
+                <button class="btn-small" onclick="openGame('rev')">Play</button>
+            </div>
+
+            <div class="game-card">
+                <h2>Pong</h2>
+                <p>2 Player or Bot, first to 10 points.</p>
+                <button class="btn-small" onclick="openGame('pong')">Play</button>
+            </div>
+
+            <div class="game-card">
+                <h2>Snake</h2>
+                <p>Classic Snake with arrow keys.</p>
+                <button class="btn-small" onclick="openGame('snake')">Play</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chatbot">
+        <div id="chat-log"></div>
+        <div id="chat-input-bar">
+            <input id="chat-input" type="text" placeholder="Ask HyperZAI anything, or do math...">
+            <button id="chat-send" onclick="chatSend()">Send</button>
+        </div>
+    </div>
+
+    <div id="game-overlay">
+        <button id="game-close" onclick="closeGame()">X</button>
+
+        <div id="game-ttt" class="game-inner">
+            <div class="game-header"><h2>Tic Tac Toe</h2></div>
+            <div class="game-options">
+                <label>Mode:</label>
+                <select id="ttt-mode">
+                    <option value="2p">2 Player</option>
+                    <option value="easy">Easy Bot</option>
+                    <option value="medium">Medium Bot</option>
+                    <option value="hard">Hard Bot</option>
+                    <option value="impossible">Impossible Bot</option>
+                </select>
+                <button class="btn-small" onclick="tttReset()">Reset</button>
+            </div>
+            <div id="ttt-board" class="board tictactoe"></div>
+            <div id="ttt-status" class="status"></div>
+        </div>
+
+        <div id="game-rev" class="game-inner">
+            <div class="game-header"><h2>Reversi</h2></div>
+            <div class="game-options">
+                <label>Mode:</label>
+                <select id="rev-mode">
+                    <option value="2p">2 Player</option>
+                    <option value="easy">Easy Bot</option>
+                    <option value="medium">Medium Bot</option>
+                    <option value="hard">Hard Bot</option>
+                    <option value="impossible">Impossible Bot</option>
+                </select>
+                <button class="btn-small" onclick="revReset()">Reset</button>
+            </div>
+            <div id="rev-board" class="board reversi"></div>
+            <div id="rev-status" class="status"></div>
+        </div>
+
+        <div id="game-pong" class="game-inner">
+            <div class="game-header"><h2>Pong</h2></div>
+            <div class="game-options">
+                <label>Mode:</label>
+                <select id="pong-mode">
+                    <option value="2p">2 Player</option>
+                    <option value="easy">Easy Bot</option>
+                    <option value="medium">Medium Bot</option>
+                    <option value="hard">Hard Bot</option>
+                </select>
+                <button class="btn-small" onclick="pongReset()">Reset</button>
+            </div>
+            <canvas id="pong-canvas" width="640" height="360"></canvas>
+            <div id="pong-status" class="status"></div>
+        </div>
+
+        <div id="game-snake" class="game-inner">
+            <div class="game-header"><h2>Snake</h2></div>
+            <div class="game-options">
+                <button class="btn-small" onclick="snakeReset()">Reset</button>
+            </div>
+            <canvas id="snake-canvas" width="400" height="400"
+                style="background:#02030a; border:1px solid #1a2238; border-radius:18px; box-shadow:0 18px 40px #000000aa;">
+            </canvas>
+            <div id="snake-status" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(id) {
+            document.getElementById("zweb").style.display = "none";
+            document.getElementById("games").style.display = "none";
+            document.getElementById("chatbot").style.display = "none";
+            document.getElementById(id).style.display = "block";
+
+            if (id === "zweb") {
+                document.getElementById("zweb-frame").style.display = "block";
+                document.getElementById("hyperzsearch").style.display = "none";
+            }
+        }
+
+        var searchBtn = document.getElementById("searchBtn");
+        var searchPanel = document.getElementById("searchPanel");
+        var searchInput = document.getElementById("searchInput");
+
+        searchBtn.onclick = function () {
+            var active = searchBtn.className.indexOf("active") === -1;
+            if (active) {
+                if (searchBtn.className.indexOf("active") === -1) {
+                    searchBtn.className += " active";
+                }
+                if (searchPanel.className.indexOf("active") === -1) {
+                    searchPanel.className += " active";
+                }
+                setTimeout(function () { searchInput.focus(); }, 50);
+            } else {
+                searchBtn.className = searchBtn.className.replace(" active", "");
+                searchPanel.className = searchPanel.className.replace(" active", "");
+            }
+        };
+
+        searchInput.onkeydown = function (e) {
+            e = e || window.event;
+            if (e.key === "Enter" || e.keyCode === 13) {
+                runGlobalSearch(searchInput.value.replace(/^\s+|\s+$/g, ""));
+            }
+        };
+
+        function runGlobalSearch(q) {
+            if (!q) return;
+            var lower = q.toLowerCase();
+
+            searchBtn.className = searchBtn.className.replace(" active", "");
+            searchPanel.className = searchPanel.className.replace(" active", "");
+
+            if (lower.indexOf("tic") !== -1 || lower.indexOf("toe") !== -1 || lower.indexOf("ttt") !== -1) {
+                showSection("games");
+                openGame("ttt");
+                return;
+            }
+            if (lower.indexOf("rev") !== -1 || lower.indexOf("reversi") !== -1 || lower.indexOf("othello") !== -1) {
+                showSection("games");
+                openGame("rev");
+                return;
+            }
+            if (lower.indexOf("pong") !== -1) {
+                showSection("games");
+                openGame("pong");
+                return;
+            }
+            if (lower.indexOf("snake") !== -1) {
+                showSection("games");
+                openGame("snake");
+                return;
+            }
+
+            showSection("chatbot");
+            addChatMessage(q, "user");
+            handleChat(q);
+        }
+
+        var tabs = [];
+        var currentTab = null;
+
+        function createTab(url) {
+            if (!url) url = "New Tab";
+            var id = new Date().getTime();
+            var tab = { id: id, url: url };
+            tabs.push(tab);
+
+            var tabEl = document.createElement("div");
+            tabEl.className = "tab";
+            tabEl.setAttribute("data-id", id);
+
+            var title = document.createElement("span");
+            title.innerHTML = url;
+
+            var close = document.createElement("span");
+            close.className = "close-btn";
+            close.innerHTML = "&times;";
+            close.onclick = (function (tid) {
+                return function (e) {
+                    if (e && e.stopPropagation) e.stopPropagation();
+                    closeTab(tid);
+                };
+            })(id);
+
+            tabEl.appendChild(title);
+            tabEl.appendChild(close);
+
+            tabEl.onclick = (function (tid) {
+                return function () {
+                    switchTab(tid);
+                };
+            })(id);
+
+            var tabsBar = document.getElementById("tabs");
+            tabsBar.insertBefore(tabEl, tabsBar.querySelector(".new-tab-btn"));
+
+            switchTab(id);
+        }
+
+        function switchTab(id) {
+            var i;
+            currentTab = null;
+            for (i = 0; i < tabs.length; i++) {
+                if (tabs[i].id === id) {
+                    currentTab = tabs[i];
+                    break;
+                }
+            }
+            var tabEls = document.getElementsByClassName("tab");
+            for (i = 0; i < tabEls.length; i++) {
+                var el = tabEls[i];
+                var tid = parseInt(el.getAttribute("data-id"), 10);
+                if (tid === id) {
+                    if (el.className.indexOf("active") === -1) {
+                        el.className += " active";
+                    }
+                } else {
+                    el.className = el.className.replace(" active", "");
+                }
+            }
+
+            if (!currentTab) return;
+
+            document.getElementById("hyperzsearch").style.display = "none";
+            document.getElementById("zweb-frame").style.display = "block";
+
+            if (currentTab.url === "New Tab") {
+                document.getElementById("zweb-frame").src = "about:blank";
+                document.getElementById("zweb-url").value = "";
+            } else {
+                loadTab(currentTab.url);
+            }
+        }
+
+        function closeTab(id) {
+            var i;
+            var index = -1;
+            for (i = 0; i < tabs.length; i++) {
+                if (tabs[i].id === id) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index === -1) return;
+
+            tabs.splice(index, 1);
+
+            var tabEls = document.getElementsByClassName("tab");
+            for (i = tabEls.length - 1; i >= 0; i--) {
+                if (parseInt(tabEls[i].getAttribute("data-id"), 10) === id) {
+                    tabEls[i].parentNode.removeChild(tabEls[i]);
+                    break;
+                }
+            }
+
+            if (currentTab && currentTab.id === id) {
+                if (tabs.length > 0) {
+                    var newIndex = index - 1;
+                    if (newIndex < 0) newIndex = 0;
+                    switchTab(tabs[newIndex].id);
+                } else {
+                    createTab();
+                }
+            }
+        }
+
+        function loadTab(url) {
+            var frame = document.getElementById("zweb-frame");
+            var input = document.getElementById("zweb-url");
+
+            if (url.indexOf("http://") !== 0 && url.indexOf("https://") !== 0) {
+                url = "https://" + url;
+            }
+
+            frame.src = url;
+            input.value = url;
+            currentTab.url = url;
+
+            var tabEls = document.getElementsByClassName("tab");
+            var i;
+            for (i = 0; i < tabEls.length; i++) {
+                if (parseInt(tabEls[i].getAttribute("data-id"), 10) === currentTab.id) {
+                    var span = tabEls[i].getElementsByTagName("span")[0];
+                    var short = url.replace(/^https?:\/\//, "");
+                    if (short.length > 18) short = short.substring(0, 15) + "...";
+                    span.innerHTML = short;
+                    break;
+                }
+            }
+        }
+
+        function zwebNavigate() {
+            var q = document.getElementById("zweb-url").value.replace(/^\s+|\s+$/g, "");
+            if (!q) return;
+
+            var isURL = (
+                q.indexOf("http://") === 0 ||
+                q.indexOf("https://") === 0 ||
+                q.indexOf(".") !== -1
+            );
+
+            if (isURL) {
+                if (!currentTab) createTab(q);
+                loadTab(q);
+                return;
+            }
+
+            runHyperZSearch(q);
+        }
+
+        document.getElementById("zweb-url").onkeydown = function (e) {
+            e = e || window.event;
+            if (e.key === "Enter" || e.keyCode === 13) {
+                zwebNavigate();
+            }
+        };
+
+        createTab();
+        showSection("zweb");
+
+        function openGame(gameId) {
+            document.getElementById("game-overlay").style.display = "block";
+            document.getElementById("game-ttt").style.display = "none";
+            document.getElementById("game-rev").style.display = "none";
+            document.getElementById("game-pong").style.display = "none";
+            document.getElementById("game-snake").style.display = "none";
+
+            if (gameId === "ttt") {
+                document.getElementById("game-ttt").style.display = "block";
+                tttReset();
+            } else if (gameId === "rev") {
+                document.getElementById("game-rev").style.display = "block";
+                revReset();
+            } else if (gameId === "pong") {
+                document.getElementById("game-pong").style.display = "block";
+                pongReset();
+            } else if (gameId === "snake") {
+                document.getElementById("game-snake").style.display = "block";
+                snakeReset();
+            }
+        }
+
+        function closeGame() {
+            document.getElementById("game-overlay").style.display = "none";
+            pongStop();
+            snakeRunning = false;
+            if (snakeTimer) clearInterval(snakeTimer);
+        }
+
+        var tttBoardEl = document.getElementById("ttt-board");
+        var tttStatusEl = document.getElementById("ttt-status");
+        var tttModeEl = document.getElementById("ttt-mode");
+        var tttBoard, tttCurrent, tttGameOver;
+
+        function tttInitBoard() {
+            var i;
+            tttBoard = [];
+            for (i = 0; i < 9; i++) tttBoard.push(null);
+            tttCurrent = "X";
+            tttGameOver = false;
+            tttBoardEl.innerHTML = "";
+            for (i = 0; i < 9; i++) {
+                (function (idx) {
+                    var cell = document.createElement("div");
+                    cell.className = "cell";
+                    cell.onclick = function () { tttClick(idx); };
+                    tttBoardEl.appendChild(cell);
+                })(i);
+            }
+            tttStatusEl.innerHTML = "X's turn";
+        }
+
+        function tttCheckWinner(b) {
+            var lines = [
+                [0,1,2],[3,4,5],[6,7,8],
+                [0,3,6],[1,4,7],[2,5,8],
+                [0,4,8],[2,4,6]
+            ];
+            var i, a, c, d;
+            for (i = 0; i < lines.length; i++) {
+                a = lines[i][0];
+                c = lines[i][1];
+                d = lines[i][2];
+                if (b[a] && b[a] === b[c] && b[a] === b[d]) return b[a];
+            }
+            for (i = 0; i < 9; i++) {
+                if (!b[i]) return null;
+            }
+            return "draw";
+        }
+
+        function tttClick(i) {
+            if (tttGameOver || tttBoard[i]) return;
+            var mode = tttModeEl.value;
+            var cells = tttBoardEl.children;
+
+            tttBoard[i] = tttCurrent;
+            cells[i].innerHTML = tttCurrent;
+
+            var res = tttCheckWinner(tttBoard);
+            if (res) {
+                tttGameOver = true;
+                tttStatusEl.innerHTML = (res === "draw" ? "Draw!" : (res + " wins!"));
+                return;
+            }
+
+            if (mode === "2p") {
+                tttCurrent = (tttCurrent === "X" ? "O" : "X");
+                tttStatusEl.innerHTML = tttCurrent + "'s turn";
+            } else {
+                tttStatusEl.innerHTML = "Bot thinking...";
+                setTimeout(function () { tttBotMove(mode); }, 200);
+            }
+        }
+
+        function tttFindWinningMove(player) {
+            var i, res;
+            for (i = 0; i < 9; i++) {
+                if (!tttBoard[i]) {
+                    tttBoard[i] = player;
+                    res = tttCheckWinner(tttBoard);
+                    tttBoard[i] = null;
+                    if (res === player) return i;
+                }
+            }
+            return null;
+        }
+
+        function tttBestMoveRandomish() {
+            var center = 4;
+            if (!tttBoard[center]) return center;
+            var corners = [0,2,6,8];
+            var avail = [];
+            var i;
+            for (i = 0; i < corners.length; i++) {
+                if (!tttBoard[corners[i]]) avail.push(corners[i]);
+            }
+            if (avail.length) return avail[Math.floor(Math.random() * avail.length)];
+            var sides = [1,3,5,7];
+            avail = [];
+            for (i = 0; i < sides.length; i++) {
+                if (!tttBoard[sides[i]]) avail.push(sides[i]);
+            }
+            if (avail.length) return avail[Math.floor(Math.random() * avail.length)];
+            return null;
+        }
+
+        function tttBestMoveMinimax() {
+            function minimax(board, isMax) {
+                var res = tttCheckWinner(board);
+                var i, best, val;
+                if (res === "O") return 10;
+                if (res === "X") return -10;
+                if (res === "draw") return 0;
+
+                if (isMax) {
+                    best = -9999;
+                    for (i = 0; i < 9; i++) {
+                        if (!board[i]) {
+                            board[i] = "O";
+                            val = minimax(board, false);
+                            board[i] = null;
+                            if (val > best) best = val;
+                        }
+                    }
+                    return best;
+                } else {
+                    best = 9999;
+                    for (i = 0; i < 9; i++) {
+                        if (!board[i]) {
+                            board[i] = "X";
+                            val = minimax(board, true);
+                            board[i] = null;
+                            if (val < best) best = val;
+                        }
+                    }
+                    return best;
+                }
+            }
+
+            var bestVal = -9999;
+            var bestMove = null;
+            var i, val;
+            for (i = 0; i < 9; i++) {
+                if (!tttBoard[i]) {
+                    tttBoard[i] = "O";
+                    val = minimax(tttBoard, false);
+                    tttBoard[i] = null;
+                    if (val > bestVal) {
+                        bestVal = val;
+                        bestMove = i;
+                    }
+                }
+            }
+            return bestMove;
+        }
+
+        function tttBotMove(mode) {
+            if (tttGameOver) return;
+            var cells = tttBoardEl.children;
+            var empties = [];
+            var i;
+            for (i = 0; i < 9; i++) {
+                if (!tttBoard[i]) empties.push(i);
+            }
+            if (!empties.length) return;
+
+            var move;
+            if (mode === "easy") {
+                move = empties[Math.floor(Math.random() * empties.length)];
+            } else if (mode === "medium") {
+                move = tttFindWinningMove("O");
+                if (move === null) move = tttFindWinningMove("X");
+                if (move === null) move = empties[Math.floor(Math.random() * empties.length)];
+            } else if (mode === "hard") {
+                move = tttFindWinningMove("O");
+                if (move === null) move = tttFindWinningMove("X");
+                if (move === null) move = tttBestMoveRandomish();
+            } else {
+                move = tttBestMoveMinimax();
+            }
+
+            tttBoard[move] = "O";
+            cells[move].innerHTML = "O";
+
+            var res = tttCheckWinner(tttBoard);
+            if (res) {
+                tttGameOver = true;
+                tttStatusEl.innerHTML = (res === "draw" ? "Draw!" : (res + " wins!"));
+                return;
+            }
+            tttStatusEl.innerHTML = "Your turn";
+        }
+
+        function tttReset() {
+            tttInitBoard();
+        }
+
+        tttInitBoard();
+
+        var revBoardEl = document.getElementById("rev-board");
+        var revStatusEl = document.getElementById("rev-status");
+        var revModeEl = document.getElementById("rev-mode");
+        var revBoard, revCurrent, revGameOver;
+        var revLastMove = null;
+        var revLastFlipped = [];
+        var revAnimating = false;
+
+        function revInitBoard() {
+            var r, c;
+            revBoard = [];
+            for (r = 0; r < 8; r++) {
+                revBoard[r] = [];
+                for (c = 0; c < 8; c++) revBoard[r][c] = null;
+            }
+            revCurrent = "B";
+            revGameOver = false;
+            revBoard[3][3] = "W";
+            revBoard[3][4] = "B";
+            revBoard[4][3] = "B";
+            revBoard[4][4] = "W";
+            revLastMove = null;
+            revLastFlipped = [];
+            revRender();
+            revStatusEl.innerHTML = "Black (●) to move";
+        }
+
+        function revRender() {
+            revBoardEl.innerHTML = "";
+            var r, c, cell, v;
+            for (r = 0; r < 8; r++) {
+                for (c = 0; c < 8; c++) {
+                    (function (rr, cc) {
+                        cell = document.createElement("div");
+                        cell.className = "cell reversi-cell";
+                        cell.onclick = function () { revClick(rr, cc); };
+                        v = revBoard[rr][cc];
+                        if (v === "B") cell.innerHTML = "●";
+                        else if (v === "W") cell.innerHTML = "○";
+                        revBoardEl.appendChild(cell);
+                    })(r, c);
+                }
+            }
+
+            if (revLastMove) {
+                var idx = revLastMove.r * 8 + revLastMove.c;
+                if (revBoardEl.children[idx]) {
+                    revBoardEl.children[idx].style.background = "#0044aa";
+                }
+            }
+
+            var i;
+            for (i = 0; i < revLastFlipped.length; i++) {
+                r = revLastFlipped[i][0];
+                c = revLastFlipped[i][1];
+                idx = r * 8 + c;
+                if (revBoardEl.children[idx]) {
+                    revBoardEl.children[idx].style.background = "#006600";
+                }
+            }
+        }
+
+        function revInBounds(r, c) {
+            return r >= 0 && r < 8 && c >= 0 && c < 8;
+        }
+
+        function revGetFlips(r, c, player, board) {
+            if (!board) board = revBoard;
+            var opp = (player === "B" ? "W" : "B");
+            var flips = [];
+            if (board[r][c]) return flips;
+            var dr, dc, rr, cc, line;
+            for (dr = -1; dr <= 1; dr++) {
+                for (dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    rr = r + dr;
+                    cc = c + dc;
+                    line = [];
+                    while (revInBounds(rr, cc) && board[rr][cc] === opp) {
+                        line.push([rr, cc]);
+                        rr += dr;
+                        cc += dc;
+                    }
+                    if (line.length && revInBounds(rr, cc) && board[rr][cc] === player) {
+                        flips = flips.concat(line);
+                    }
+                }
+            }
+            return flips;
+        }
+
+        function revValidMoves(player, board) {
+            if (!board) board = revBoard;
+            var moves = [];
+            var r, c, flips;
+            for (r = 0; r < 8; r++) {
+                for (c = 0; c < 8; c++) {
+                    flips = revGetFlips(r, c, player, board);
+                    if (flips.length) moves.push([r, c]);
+                }
+            }
+            return moves;
+        }
+
+        function revApplyMove(r, c, player, board) {
+            var flips = revGetFlips(r, c, player, board);
+            if (!flips.length) return null;
+            var i;
+            board[r][c] = player;
+            for (i = 0; i < flips.length; i++) {
+                board[flips[i][0]][flips[i][1]] = player;
+            }
+            return flips;
+        }
+
+        function revClick(r, c) {
+            if (revGameOver || revAnimating) return;
+            var mode = revModeEl.value;
+            var flips = revGetFlips(r, c, revCurrent);
+            if (!flips.length) return;
+
+            revAnimating = true;
+            revPlayMoveAnimated(r, c, revCurrent, flips, function () {
+                revAnimating = false;
+                revNextTurn(mode);
+            });
+        }
+
+        function revPlayMoveAnimated(r, c, player, flips, done) {
+            revBoard[r][c] = player;
+            revLastMove = { r: r, c: c, player: player };
+            revLastFlipped = [];
+            revRender();
+
+            var i = 0;
+            function step() {
+                if (i < flips.length) {
+                    var fr = flips[i][0];
+                    var fc = flips[i][1];
+                    revBoard[fr][fc] = player;
+                    revLastFlipped = flips.slice(0, i + 1);
+                    i++;
+                    revRender();
+                    setTimeout(step, 40);
+                } else {
+                    revLastFlipped = flips;
+                    revRender();
+                    setTimeout(done, 400);
+                }
+            }
+            step();
+        }
+
+        function revNextTurn(mode) {
+            if (revGameOver) return;
+
+            var currentMoves = revValidMoves(revCurrent);
+            var otherPlayer = (revCurrent === "B" ? "W" : "B");
+            var otherMoves = revValidMoves(otherPlayer);
+
+            var r, c, b, w, i;
+
+            if (currentMoves.length === 0 && otherMoves.length === 0) {
+                revGameOver = true;
+                b = 0; w = 0;
+                for (r = 0; r < 8; r++) {
+                    for (c = 0; c < 8; c++) {
+                        if (revBoard[r][c] === "B") b++;
+                        if (revBoard[r][c] === "W") w++;
+                    }
+                }
+                if (b > w) revStatusEl.innerHTML = "Black (●) wins " + b + " - " + w;
+                else if (w > b) revStatusEl.innerHTML = "White (○) wins " + w + " - " + b;
+                else revStatusEl.innerHTML = "Draw " + b + " - " + w;
+                revRender();
+                return;
+            }
+
+            if (currentMoves.length === 0 && otherMoves.length > 0) {
+                revCurrent = otherPlayer;
+                revStatusEl.innerHTML = (revCurrent === "B" ? "Black (●)" : "White (○)") + " to move (other player had no moves)";
+                revRender();
+                if (mode !== "2p" && revCurrent === "W") {
+                    setTimeout(function () { revBotMove(mode); }, 500);
+                }
+                return;
+            }
+
+            revCurrent = otherPlayer;
+            revStatusEl.innerHTML = (revCurrent === "B" ? "Black (●)" : "White (○)") + " to move";
+
+            if (revLastMove) {
+                revStatusEl.innerHTML =
+                    (revLastMove.player === "B" ? "Black (●)" : "White (○)") +
+                    " played <b>" + (revLastMove.r + 1) + "," + (revLastMove.c + 1) + "</b><br>" +
+                    "Flipped: " + revLastFlipped.length;
+            }
+
+            revRender();
+
+            if (mode !== "2p" && revCurrent === "W") {
+                setTimeout(function () { revBotMove(mode); }, 500);
+            }
+        }
+
+        function revBotMove(mode) {
+            if (revGameOver || revAnimating) return;
+            var move = revBotChooseMove(mode, "W");
+            if (!move) {
+                revNextTurn(mode);
+                return;
+            }
+            var r = move[0];
+            var c = move[1];
+            var flips = revGetFlips(r, c, "W");
+            if (!flips.length) {
+                revNextTurn(mode);
+                return;
+            }
+            revAnimating = true;
+            revPlayMoveAnimated(r, c, "W", flips, function () {
+                revAnimating = false;
+                revNextTurn(mode);
+            });
+        }
+
+        function revBotChooseMove(mode, player) {
+            var moves = revValidMoves(player);
+            if (!moves.length) return null;
+
+            var i, r, c, flips, best, bestScore, boardCopy, opp, oppMoves;
+
+            if (mode === "easy") {
+                return moves[Math.floor(Math.random() * moves.length)];
+            }
+
+            if (mode === "medium") {
+                best = null;
+                bestScore = -1;
+                for (i = 0; i < moves.length; i++) {
+                    r = moves[i][0];
+                    c = moves[i][1];
+                    flips = revGetFlips(r, c, player);
+                    if (flips.length > bestScore) {
+                        bestScore = flips.length;
+                        best = [r, c];
+                    }
+                }
+                return best;
+            }
+
+            if (mode === "hard") {
+                best = null;
+                bestScore = 9999;
+                for (i = 0; i < moves.length; i++) {
+                    r = moves[i][0];
+                    c = moves[i][1];
+                    boardCopy = revCopyBoard(revBoard);
+                    revApplyMove(r, c, player, boardCopy);
+                    opp = (player === "B" ? "W" : "B");
+                    oppMoves = revValidMoves(opp, boardCopy).length;
+                    if (oppMoves < bestScore) {
+                        bestScore = oppMoves;
+                        best = [r, c];
+                    }
+                }
+                return best;
+            }
+
+            var depth = 3;
+            opp = (player === "B" ? "W" : "B");
+
+            function scoreBoard(board) {
+                var b = 0, w = 0, r2, c2;
+                for (r2 = 0; r2 < 8; r2++) {
+                    for (c2 = 0; c2 < 8; c2++) {
+                        if (board[r2][c2] === "B") b++;
+                        if (board[r2][c2] === "W") w++;
+                    }
+                }
+                return (player === "B" ? (b - w) : (w - b));
+            }
+
+            function minimax(board, curPlayer, d, alpha, beta) {
+                if (d === 0) return scoreBoard(board);
+                var curMoves = revValidMoves(curPlayer, board);
+                if (!curMoves.length) return scoreBoard(board);
+
+                var bestVal, i2, r3, c3, copy, val;
+                if (curPlayer === player) {
+                    bestVal = -9999;
+                    for (i2 = 0; i2 < curMoves.length; i2++) {
+                        r3 = curMoves[i2][0];
+                        c3 = curMoves[i2][1];
+                        copy = revCopyBoard(board);
+                        revApplyMove(r3, c3, curPlayer, copy);
+                        val = minimax(copy, opp, d - 1, alpha, beta);
+                        if (val > bestVal) bestVal = val;
+                        if (val > alpha) alpha = val;
+                        if (beta <= alpha) break;
+                    }
+                    return bestVal;
+                } else {
+                    bestVal = 9999;
+                    for (i2 = 0; i2 < curMoves.length; i2++) {
+                        r3 = curMoves[i2][0];
+                        c3 = curMoves[i2][1];
+                        copy = revCopyBoard(board);
+                        revApplyMove(r3, c3, curPlayer, copy);
+                        val = minimax(copy, player, d - 1, alpha, beta);
+                        if (val < bestVal) bestVal = val;
+                        if (val < beta) beta = val;
+                        if (beta <= alpha) break;
+                    }
+                    return bestVal;
+                }
+            }
+
+            var bestMove = null;
+            var bestVal = -9999;
+            var val2;
+            for (i = 0; i < moves.length; i++) {
+                r = moves[i][0];
+                c = moves[i][1];
+                boardCopy = revCopyBoard(revBoard);
+                revApplyMove(r, c, player, boardCopy);
+                val2 = minimax(boardCopy, opp, depth - 1, -9999, 9999);
+                if (val2 > bestVal) {
+                    bestVal = val2;
+                    bestMove = [r, c];
+                }
+            }
+            if (!bestMove) bestMove = moves[0];
+            return bestMove;
+        }
+
+        function revCopyBoard(board) {
+            var r, c, copy = [];
+            for (r = 0; r < 8; r++) {
+                copy[r] = [];
+                for (c = 0; c < 8; c++) copy[r][c] = board[r][c];
+            }
+            return copy;
+        }
+
+        function revReset() {
+            revInitBoard();
+        }
+
+        revInitBoard();
+
+        var pongCanvas = document.getElementById("pong-canvas");
+        var pongCtx = pongCanvas.getContext("2d");
+        var pongStatusEl = document.getElementById("pong-status");
+        var pongModeEl = document.getElementById("pong-mode");
+
+        var pongBall, pongLeft, pongRight;
+        var pongKeys = {};
+        var pongRunning = false;
+        var pongTimer = null;
+        var leftScore = 0;
+        var rightScore = 0;
+
+        function pongInit() {
+            pongBall = {
+                x: pongCanvas.width / 2,
+                y: pongCanvas.height / 2,
+                vx: 3,
+                vy: 2.5,
+                r: 6
+            };
+            pongLeft = { x: 20, y: pongCanvas.height / 2 - 40, w: 10, h: 80 };
+            pongRight = { x: pongCanvas.width - 30, y: pongCanvas.height / 2 - 40, w: 10, h: 80 };
+            leftScore = 0;
+            rightScore = 0;
+            pongStatusEl.innerHTML = leftScore + " | " + rightScore + " (first to 10)";
+        }
+
+        function pongReset() {
+            pongInit();
+            pongRunning = true;
+            if (pongTimer) clearInterval(pongTimer);
+            pongTimer = setInterval(pongLoop, 1000 / 120);
+        }
+
+        function pongStop() {
+            pongRunning = false;
+            if (pongTimer) {
+                clearInterval(pongTimer);
+                pongTimer = null;
+            }
+        }
+
+        function resetBall(direction) {
+            if (!direction) direction = 1;
+            pongBall.x = pongCanvas.width / 2;
+            pongBall.y = pongCanvas.height / 2;
+            pongBall.vx = 3 * direction;
+            pongBall.vy = (Math.random() > 0.5 ? 1 : -1) * 2.5;
+        }
+
+        window.addEventListener("keydown", function (e) {
+            pongKeys[e.key] = true;
+        });
+        window.addEventListener("keyup", function (e) {
+            pongKeys[e.key] = false;
+        });
+
+        function pongUpdate() {
+            if (!pongRunning) return;
+
+            var mode = pongModeEl.value;
+
+            if (pongKeys["w"]) pongLeft.y -= 4;
+            if (pongKeys["s"]) pongLeft.y += 4;
+
+            if (mode === "2p") {
+                if (pongKeys["ArrowUp"]) pongRight.y -= 4;
+                if (pongKeys["ArrowDown"]) pongRight.y += 4;
+            } else {
+                var speed = (mode === "easy" ? 2 : (mode === "medium" ? 3 : 4));
+                if (pongBall.y < pongRight.y + pongRight.h / 2) pongRight.y -= speed;
+                else pongRight.y += speed;
+            }
+
+            if (pongLeft.y < 0) pongLeft.y = 0;
+            if (pongLeft.y + pongLeft.h > pongCanvas.height) pongLeft.y = pongCanvas.height - pongLeft.h;
+            if (pongRight.y < 0) pongRight.y = 0;
+            if (pongRight.y + pongRight.h > pongCanvas.height) pongRight.y = pongCanvas.height - pongRight.h;
+
+            pongBall.x += pongBall.vx;
+            pongBall.y += pongBall.vy;
+
+            if (pongBall.y - pongBall.r < 0 || pongBall.y + pongBall.r > pongCanvas.height) {
+                pongBall.vy *= -1;
+            }
+
+            if (pongBall.x - pongBall.r < pongLeft.x + pongLeft.w &&
+                pongBall.y > pongLeft.y && pongBall.y < pongLeft.y + pongLeft.h) {
+                pongBall.vx = Math.abs(pongBall.vx);
+            }
+
+            if (pongBall.x + pongBall.r > pongRight.x &&
+                pongBall.y > pongRight.y && pongBall.y < pongRight.y + pongRight.h) {
+                pongBall.vx = -Math.abs(pongBall.vx);
+            }
+
+            if (pongBall.x < 0) {
+                rightScore++;
+                if (rightScore >= 10) {
+                    pongStatusEl.innerHTML = leftScore + " | " + rightScore + " — Right wins!";
+                    pongStop();
+                } else {
+                    resetBall(1);
+                    pongStatusEl.innerHTML = leftScore + " | " + rightScore + " (first to 10)";
+                }
+            } else if (pongBall.x > pongCanvas.width) {
+                leftScore++;
+                if (leftScore >= 10) {
+                    pongStatusEl.innerHTML = leftScore + " | " + rightScore + " — Left wins!";
+                    pongStop();
+                } else {
+                    resetBall(-1);
+                    pongStatusEl.innerHTML = leftScore + " | " + rightScore + " (first to 10)";
+                }
+            }
+        }
+
+        function pongDraw() {
+            pongCtx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
+            pongCtx.fillStyle = "#00b4ff";
+            pongCtx.fillRect(pongLeft.x, pongLeft.y, pongLeft.w, pongLeft.h);
+            pongCtx.fillRect(pongRight.x, pongRight.y, pongRight.w, pongRight.h);
+            pongCtx.beginPath();
+            pongCtx.arc(pongBall.x, pongBall.y, pongBall.r, 0, Math.PI * 2);
+            pongCtx.fill();
+
+            pongCtx.fillStyle = "#00b4ff";
+            pongCtx.font = "16px Segoe UI";
+            pongCtx.fillText(leftScore + " | " + rightScore, pongCanvas.width / 2 - 30, 20);
+        }
+
+        function pongLoop() {
+            pongUpdate();
+            pongDraw();
+        }
+
+        pongInit();
+
+        var chatLog = document.getElementById("chat-log");
+        var chatInput = document.getElementById("chat-input");
+
+        chatInput.onkeydown = function (e) {
+            e = e || window.event;
+            if (e.key === "Enter" || e.keyCode === 13) chatSend();
+        };
+
+        function addChatMessage(text, who) {
+            var wrapper = document.createElement("div");
+            var label = document.createElement("div");
+            var bubble = document.createElement("div");
+
+            wrapper.style.display = "flex";
+            wrapper.style.flexDirection = "column";
+            wrapper.style.marginBottom = "6px";
+
+            label.className = "chat-label";
+            bubble.className = "chat-msg " + who;
+
+            if (who === "user") {
+                wrapper.style.alignItems = "flex-end";
+                label.innerHTML = "You";
+            } else {
+                wrapper.style.alignItems = "flex-start";
+                label.innerHTML = "HyperZAI";
+            }
+
+            bubble.innerHTML = text;
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(bubble);
+            chatLog.appendChild(wrapper);
+
+            setTimeout(function () {
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }, 0);
+        }
+
+        function chatSend() {
+            var q = chatInput.value.replace(/^\s+|\s+$/g, "");
+            if (!q) return;
+            chatInput.value = "";
+            addChatMessage(q, "user");
+            handleChat(q);
+        }
+
+        function handleChat(q) {
+            if (looksLikeMath(q)) {
+                try {
+                    var res = evalMathExpression(q);
+                    addChatMessage(String(res), "bot");
+                } catch (e) {
+                    addChatMessage("Math error: " + e.message, "bot");
+                }
+            } else {
+                fetchWikipedia(q);
+            }
+        }
+
+        function looksLikeMath(q) {
+            if (/[Σσ]/.test(q)) return true;
+            if (/factorial|fib|fibonacci/i.test(q)) return true;
+            if (/[0-9]/.test(q) && /[+\-*/^!]/.test(q)) return true;
+            if (/sqrt|cos|sin|tan|log|ln/i.test(q)) return true;
+            return false;
+        }
+
+        function evalMathExpression(expr) {
+            expr = expr.replace(/\s+/g, "");
+
+            expr = expr.replace(/Σ\(([^,]+),([^,]+),([^,]+)\)/gi,
+                function (_, from, to, body) { return "sigma(" + from + "," + to + ",(" + body + "))"; });
+
+            expr = expr.replace(/Σ_?([a-zA-Z])=([^^]+)\^([^()]+)\(([^)]+)\)/g,
+                function (_, v, from, to, body) { return "sigma(" + from + "," + to + ",(" + body + "))"; });
+
+            expr = expr.replace(/fib\(([^)]+)\)/gi, "fib($1)");
+            expr = expr.replace(/fibonacci\(([^)]+)\)/gi, "fib($1)");
+
+            expr = expr.replace(/([0-9]+)!/g, "fact($1)");
+
+            var hasDecimal = /[0-9]*\.[0-9]+/.test(expr);
+            var hasNonIntOps = /sqrt|cos|sin|tan|log|ln/i.test(expr);
+
+            function fact(n) {
+                n = BigInt(n);
+                if (n < 0n) throw new Error("factorial of negative");
+                var r = 1n;
+                var i;
+                for (i = 2n; i <= n; i++) r *= i;
+                return r;
+            }
+
+            function fib(n) {
+                n = BigInt(n);
+                if (n < 0n) throw new Error("fib of negative");
+                var a = 0n, b = 1n, i;
+                for (i = 0n; i < n; i++) {
+                    var tmp = a;
+                    a = b;
+                    b = tmp + b;
+                }
+                return a;
+            }
+
+            function sigma(from, to, bodyFnVar) {
+                var f = BigInt(from);
+                var t = BigInt(to);
+                var i, body, replaced;
+                if (hasDecimal || hasNonIntOps) {
+                    var sum = 0;
+                    for (i = Number(f); i <= Number(t); i++) {
+                        body = bodyFnVar.toString();
+                        replaced = body.replace(/([a-zA-Z])/g, String(i));
+                        sum += Number(Function("return " + replaced)());
+                    }
+                    return sum;
+                } else {
+                    var sumBig = 0n;
+                    for (i = f; i <= t; i++) {
+                        body = bodyFnVar.toString();
+                        replaced = body.replace(/([a-zA-Z])/g, i.toString());
+                        var val = BigInt(Function("return " + replaced)());
+                        sumBig += val;
+                    }
+                    return sumBig;
+                }
+            }
+
+            if (!hasDecimal && !hasNonIntOps && !/[eE]/.test(expr)) {
+                var safe = expr.replace(/\^/g, "**").replace(/([0-9]+)/g, "$1n");
+                var fn = Function("fact", "fib", "sigma", "return " + safe);
+                return fn(fact, fib, sigma);
+            } else {
+                var safe2 = expr
+                    .replace(/\^/g, "**")
+                    .replace(/ln\(/gi, "Math.log(")
+                    .replace(/log\(/gi, "Math.log10(")
+                    .replace(/sqrt\(/gi, "Math.sqrt(")
+                    .replace(/cos\(/gi, "Math.cos(")
+                    .replace(/sin\(/gi, "Math.sin(")
+                    .replace(/tan\(/gi, "Math.tan(");
+                var fn2 = Function("fact", "fib", "sigma", "return " + safe2);
+                return fn2(fact, fib, sigma);
+            }
+        }
+
+        function fetchWikipedia(q) {
+            var title = encodeURIComponent(q.replace(/^what\s+is\s+/i, "").replace(/^\s+|\s+$/g, ""));
+            var url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + title;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            if (data.extract) {
+                                addChatMessage(data.extract, "bot");
+                            } else {
+                                addChatMessage("No summary available for that topic.", "bot");
+                            }
+                        } catch (e) {
+                            addChatMessage("Wikipedia parse error: " + e.message, "bot");
+                        }
+                    } else {
+                        addChatMessage("Wikipedia error: " + xhr.status, "bot");
+                    }
+                }
+            };
+            xhr.send(null);
+        }
+
+        function runHyperZSearch(query) {
+            showSection("zweb");
+            document.getElementById("zweb-frame").style.display = "none";
+            document.getElementById("hyperzsearch").style.display = "block";
+
+            var resultsBox = document.getElementById("hyperzsearch-results");
+            resultsBox.innerHTML = "<p style='color:#a9b3d9;'>Searching Wikipedia for: <b>" + query + "</b>...</p>";
+
+            var url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" +
+                      encodeURIComponent(query) +
+                      "&utf8=&format=json&origin=*";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            var items = data.query && data.query.search ? data.query.search : [];
+
+                            if (!items.length) {
+                                resultsBox.innerHTML = "<p>No results found.</p>";
+                                return;
+                            }
+
+                            var html = "";
+                            for (var i = 0; i < items.length; i++) {
+                                var title = items[i].title;
+                                var snippet = items[i].snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                                var pageURL = "https://en.wikipedia.org/wiki/" + encodeURIComponent(title);
+
+                                html +=
+                                    "<div style='margin-bottom:20px; padding:12px; border:1px solid #1a2238; border-radius:12px; background:#050816;'>" +
+                                        "<div style='font-size:18px; color:#00e0ff; cursor:pointer;' onclick='openZWebTab(\"" + pageURL + "\")'>" +
+                                            title +
+                                        "</div>" +
+                                        "<div style='color:#a9b3d9; margin:6px 0;'>" +
+                                            snippet +
+                                        "</div>" +
+                                        "<div style='color:#00b4ff; font-size:13px; cursor:pointer;' onclick='openZWebTab(\"" + pageURL + "\")'>" +
+                                            pageURL +
+                                        "</div>" +
+                                    "</div>";
+                            }
+
+                            resultsBox.innerHTML = html;
+
+                        } catch (e) {
+                            resultsBox.innerHTML = "<p>Error parsing results.</p>";
+                        }
+                    } else {
+                        resultsBox.innerHTML = "<p>Search error: " + xhr.status + "</p>";
+                    }
+                }
+            };
+
+            xhr.send(null);
+        }
+
+        function openZWebTab(url) {
+            createTab(url);
+            loadTab(url);
+            document.getElementById("hyperzsearch").style.display = "none";
+            document.getElementById("zweb-frame").style.display = "block";
+        }
+
+        // SNAKE GAME
+        var snakeCanvas = document.getElementById("snake-canvas");
+        var snakeCtx = snakeCanvas.getContext("2d");
+        var snakeStatus = document.getElementById("snake-status");
+
+        var snake, snakeDir, snakeFood, snakeTimer, snakeRunning;
+
+        function snakeReset() {
+            snake = [{x:10, y:10}];
+            snakeDir = {x:1, y:0};
+            snakeFood = spawnFood();
+            snakeRunning = true;
+
+            if (snakeTimer) clearInterval(snakeTimer);
+            snakeTimer = setInterval(snakeLoop, 100);
+
+            snakeStatus.innerHTML = "Use arrow keys to move";
+        }
+
+        function spawnFood() {
+            return {
+                x: Math.floor(Math.random()*20),
+                y: Math.floor(Math.random()*20)
+            };
+        }
+
+        window.addEventListener("keydown", function(e){
+            if (!snakeRunning) return;
+            if (e.key === "ArrowUp" && snakeDir.y !== 1) snakeDir = {x:0, y:-1};
+            if (e.key === "ArrowDown" && snakeDir.y !== -1) snakeDir = {x:0, y:1};
+            if (e.key === "ArrowLeft" && snakeDir.x !== 1) snakeDir = {x:-1, y:0};
+            if (e.key === "ArrowRight" && snakeDir.x !== -1) snakeDir = {x:1, y:0};
+        });
+
+        function snakeLoop() {
+            if (!snakeRunning) return;
+
+            var head = {x: snake[0].x + snakeDir.x, y: snake[0].y + snakeDir.y};
+
+            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
+                snakeGameOver();
+                return;
+            }
+
+            for (var i=0; i<snake.length; i++) {
+                if (snake[i].x === head.x && snake[i].y === head.y) {
+                    snakeGameOver();
+                    return;
+                }
+            }
+
+            snake.unshift(head);
+
+            if (head.x === snakeFood.x && head.y === snakeFood.y) {
+                snakeFood = spawnFood();
+            } else {
+                snake.pop();
+            }
+
+            snakeDraw();
+        }
+
+        function snakeDraw() {
+            snakeCtx.clearRect(0,0,400,400);
+
+            snakeCtx.fillStyle = "#00e0ff";
+            for (var i=0; i<snake.length; i++) {
+                snakeCtx.fillRect(snake[i].x*20, snake[i].y*20, 20, 20);
+            }
+
+            snakeCtx.fillStyle = "#ff4b81";
+            snakeCtx.fillRect(snakeFood.x*20, snakeFood.y*20, 20, 20);
+        }
+
+        function snakeGameOver() {
+            snakeRunning = false;
+            clearInterval(snakeTimer);
+            snakeStatus.innerHTML = "Game Over — press Reset";
+        }
+    </script>
+</body>
+</html>

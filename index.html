@@ -803,10 +803,12 @@
             <div class="game-options">
                 <button class="btn-small" onclick="snakeReset()">Reset</button>
             </div>
-            <canvas id="snake-canvas" width="400" height="400"
-                style="background:#02030a; border:1px solid #1a2238; border-radius:18px; box-shadow:0 18px 40px #000000aa;">
-            </canvas>
-            <div id="snake-status" class="status"></div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+                <canvas id="snake-canvas" width="400" height="400"
+                    style="background:#02030a; border:1px solid #1a2238; border-radius:18px; box-shadow:0 18px 40px #000000aa; display:block;">
+                </canvas>
+                <div id="snake-status" class="status"></div>
+            </div>
         </div>
 
         <div id="game-minesweeper" class="game-inner">

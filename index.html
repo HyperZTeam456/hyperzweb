@@ -524,7 +524,7 @@
         #chat-log {
             flex:1;
             min-height:0;
-            max-height:100%;
+            max-height:calc(100% - 40px);
             border-radius:18px;
             padding:14px;
             overflow:hidden;
@@ -683,6 +683,81 @@
         .tile-2048[data-value="2048"] { background: #ff4b81; color: #f5f7ff; font-size: 24px; font-weight: 900; }
         .tile-2048[data-value="4096"] { background: #ff0066; color: #f5f7ff; font-size: 24px; }
         .tile-2048[data-value="8192"] { background: #cc0044; color: #f5f7ff; font-size: 24px; }
+
+        .board.checkers {
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(8, 40px);
+        }
+
+        .checkers-square {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            position: relative;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+        }
+
+        .checkers-square.light {
+            background: #0a1020;
+            border: 1px solid #2a3a5a;
+        }
+
+        .checkers-square.dark {
+            background: #050816;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .checkers-square.selected {
+            background: #00e0ff !important;
+            border-color: #00e0ff !important;
+            box-shadow: 0 0 12px #00b4ff44;
+        }
+
+        .checkers-square.highlight {
+            background: #00ff88 !important;
+            border-color: #00ff88 !important;
+            opacity: 0.9;
+        }
+
+        .checkers-square:hover {
+            border-color: var(--accent-soft);
+        }
+
+        .checkers-piece {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .checkers-piece.red {
+            background: linear-gradient(135deg, #ff4b81, #ff1744);
+            color: white;
+            border-color: #cc0044;
+            box-shadow: 0 4px 8px rgba(255, 27, 68, 0.3), inset 0 -2px 4px rgba(0,0,0,0.3);
+        }
+
+        .checkers-piece.black {
+            background: linear-gradient(135deg, #333, #000);
+            color: #00ff88;
+            border-color: #111;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 -2px 4px rgba(0,0,0,0.3);
+        }
+
+        .checkers-piece.king {
+            font-weight: 900;
+        }
     </style>
 </head>
 <body>
@@ -771,6 +846,12 @@
                 <h2>Flappy Bird</h2>
                 <p>Tap to fly, avoid the pipes and obstacles.</p>
                 <button class="btn-small" onclick="openGame('flappybird')">Play</button>
+            </div>
+
+            <div class="game-card">
+                <h2>Checkers</h2>
+                <p>Classic board game with AI bot difficulties.</p>
+                <button class="btn-small" onclick="openGame('checkers')">Play</button>
             </div>
         </div>
     </div>
@@ -889,6 +970,23 @@
             </div>
             <div id="flappybird-status" class="status" style="margin-top:12px;">Click canvas or press SPACE to flap</div>
         </div>
+
+        <div id="game-checkers" class="game-inner">
+            <div class="game-header"><h2>Checkers</h2></div>
+            <div class="game-options">
+                <label>Mode:</label>
+                <select id="checkers-mode">
+                    <option value="2p">2 Player</option>
+                    <option value="easy">Easy Bot</option>
+                    <option value="medium" selected>Medium Bot</option>
+                    <option value="hard">Hard Bot</option>
+                    <option value="impossible">Impossible Bot</option>
+                </select>
+                <button class="btn-small" onclick="checkersReset()">New Game</button>
+            </div>
+            <div id="checkers-board" class="board checkers"></div>
+            <div id="checkers-status" class="status"></div>
+        </div>
     </div>
 
     <script>
@@ -971,6 +1069,11 @@
             if (lower.indexOf("flappy") !== -1 || lower.indexOf("bird") !== -1) {
                 showSection("games");
                 openGame("flappybird");
+                return;
+            }
+            if (lower.indexOf("checker") !== -1) {
+                showSection("games");
+                openGame("checkers");
                 return;
             }
 
@@ -1150,6 +1253,7 @@
             document.getElementById("game-minesweeper").style.display = "none";
             document.getElementById("game-2048").style.display = "none";
             document.getElementById("game-flappybird").style.display = "none";
+            document.getElementById("game-checkers").style.display = "none";
 
             if (gameId === "ttt") {
                 document.getElementById("game-ttt").style.display = "block";
@@ -1172,6 +1276,9 @@
             } else if (gameId === "flappybird") {
                 document.getElementById("game-flappybird").style.display = "block";
                 flappybirdReset();
+            } else if (gameId === "checkers") {
+                document.getElementById("game-checkers").style.display = "block";
+                checkersReset();
             }
         }
 
@@ -2918,6 +3025,270 @@
             e.preventDefault();
             flappybirdFlap();
         });
+
+        // CHECKERS GAME
+        var checkersBoard = null;
+        var checkersModeEl = document.getElementById("checkers-mode");
+        var checkersBoardEl = document.getElementById("checkers-board");
+        var checkersStatusEl = document.getElementById("checkers-status");
+        var checkersCurrentPlayer = "red";
+        var checkersGameOver = false;
+        var checkersSelectedPiece = null;
+        var checkersValidMoves = [];
+
+        function checkersInit() {
+            checkersBoard = [];
+            var i, j;
+            for (i = 0; i < 8; i++) {
+                checkersBoard[i] = [];
+                for (j = 0; j < 8; j++) {
+                    checkersBoard[i][j] = null;
+                }
+            }
+
+            // Place red pieces (top)
+            for (i = 0; i < 3; i++) {
+                for (j = 0; j < 8; j++) {
+                    if ((i + j) % 2 === 1) {
+                        checkersBoard[i][j] = { color: "red", isKing: false };
+                    }
+                }
+            }
+
+            // Place black pieces (bottom)
+            for (i = 5; i < 8; i++) {
+                for (j = 0; j < 8; j++) {
+                    if ((i + j) % 2 === 1) {
+                        checkersBoard[i][j] = { color: "black", isKing: false };
+                    }
+                }
+            }
+
+            checkersCurrentPlayer = "red";
+            checkersGameOver = false;
+            checkersSelectedPiece = null;
+            checkersValidMoves = [];
+            checkersRender();
+            checkersStatusEl.innerHTML = "Red to move";
+        }
+
+        function checkersRender() {
+            checkersBoardEl.innerHTML = "";
+            var i, j, squareEl, piece;
+            for (i = 0; i < 8; i++) {
+                for (j = 0; j < 8; j++) {
+                    squareEl = document.createElement("div");
+                    squareEl.className = "checkers-square";
+                    squareEl.className += (i + j) % 2 === 0 ? " light" : " dark";
+
+                    // Mark selected square
+                    if (checkersSelectedPiece && checkersSelectedPiece[0] === i && checkersSelectedPiece[1] === j) {
+                        squareEl.className += " selected";
+                    }
+
+                    // Mark valid moves
+                    var isValidMove = false;
+                    for (var k = 0; k < checkersValidMoves.length; k++) {
+                        if (checkersValidMoves[k][0] === i && checkersValidMoves[k][1] === j) {
+                            squareEl.className += " highlight";
+                            isValidMove = true;
+                            break;
+                        }
+                    }
+
+                    // Add piece
+                    piece = checkersBoard[i][j];
+                    if (piece) {
+                        var pieceEl = document.createElement("div");
+                        pieceEl.className = "checkers-piece " + piece.color;
+                        if (piece.isKing) pieceEl.className += " king";
+                        pieceEl.textContent = piece.isKing ? "K" : "";
+                        squareEl.appendChild(pieceEl);
+                    }
+
+                    // Add click handler
+                    (function (row, col) {
+                        squareEl.onclick = function () { checkersClick(row, col); };
+                    })(i, j);
+
+                    checkersBoardEl.appendChild(squareEl);
+                }
+            }
+        }
+
+        function checkersClick(row, col) {
+            if (checkersGameOver) return;
+            var mode = checkersModeEl.value;
+            if (mode !== "2p" && checkersCurrentPlayer === "black") return;
+
+            // If clicking on a valid move
+            var isValidMove = false;
+            for (var i = 0; i < checkersValidMoves.length; i++) {
+                if (checkersValidMoves[i][0] === row && checkersValidMoves[i][1] === col) {
+                    isValidMove = true;
+                    checkersMove(checkersSelectedPiece[0], checkersSelectedPiece[1], row, col);
+                    checkersSelectedPiece = null;
+                    checkersValidMoves = [];
+                    checkersRender();
+                    checkersNextTurn(mode);
+                    return;
+                }
+            }
+
+            // If clicking on a piece
+            var piece = checkersBoard[row][col];
+            if (piece && piece.color === checkersCurrentPlayer) {
+                checkersSelectedPiece = [row, col];
+                checkersValidMoves = checkersGetValidMoves(row, col);
+                checkersRender();
+                return;
+            }
+
+            checkersSelectedPiece = null;
+            checkersValidMoves = [];
+            checkersRender();
+        }
+
+        function checkersGetValidMoves(row, col) {
+            var piece = checkersBoard[row][col];
+            if (!piece) return [];
+            var moves = [];
+            var directions = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+
+            // Regular moves (diagonal)
+            for (var i = 0; i < directions.length; i++) {
+                var dr = directions[i][0];
+                var dc = directions[i][1];
+
+                if (!piece.isKing) {
+                    // Red moves down, Black moves up
+                    if (piece.color === "red" && dr !== 1) continue;
+                    if (piece.color === "black" && dr !== -1) continue;
+                }
+
+                var nr = row + dr;
+                var nc = col + dc;
+
+                // Forward one space
+                if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !checkersBoard[nr][nc]) {
+                    moves.push([nr, nc]);
+                }
+
+                // Capture move (jump)
+                nr = row + dr * 2;
+                nc = col + dc * 2;
+                var captureRow = row + dr;
+                var captureCol = col + dc;
+
+                // Check bounds for capture row/col before accessing
+                if (captureRow >= 0 && captureRow < 8 && captureCol >= 0 && captureCol < 8) {
+                    var capturePiece = checkersBoard[captureRow][captureCol];
+
+                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && 
+                        capturePiece && capturePiece.color !== piece.color && !checkersBoard[nr][nc]) {
+                        moves.push([nr, nc]);
+                    }
+                }
+            }
+
+            return moves;
+        }
+
+        function checkersMove(fromRow, fromCol, toRow, toCol) {
+            var piece = checkersBoard[fromRow][fromCol];
+            var distance = Math.abs(toRow - fromRow);
+
+            // Handle capture
+            if (distance === 2) {
+                var captureRow = (fromRow + toRow) / 2;
+                var captureCol = (fromCol + toCol) / 2;
+                checkersBoard[captureRow][captureCol] = null;
+            }
+
+            // Move piece
+            checkersBoard[toRow][toCol] = piece;
+            checkersBoard[fromRow][fromCol] = null;
+
+            // Promote to king
+            if ((piece.color === "red" && toRow === 7) || (piece.color === "black" && toRow === 0)) {
+                piece.isKing = true;
+            }
+        }
+
+        function checkersNextTurn(mode) {
+            checkersCurrentPlayer = checkersCurrentPlayer === "red" ? "black" : "red";
+            checkersStatusEl.innerHTML = (checkersCurrentPlayer === "red" ? "Red" : "Black") + " to move";
+
+            if (mode !== "2p" && checkersCurrentPlayer === "black") {
+                setTimeout(function () { checkersBotMove(mode); }, 500);
+            }
+        }
+
+        function checkersBotMove(mode) {
+            if (checkersGameOver || checkersCurrentPlayer !== "black") return;
+
+            var validMoves = [];
+            var i, j, moves;
+
+            // Find all valid moves for black
+            for (i = 0; i < 8; i++) {
+                for (j = 0; j < 8; j++) {
+                    if (checkersBoard[i][j] && checkersBoard[i][j].color === "black") {
+                        moves = checkersGetValidMoves(i, j);
+                        for (var k = 0; k < moves.length; k++) {
+                            validMoves.push({ from: [i, j], to: moves[k] });
+                        }
+                    }
+                }
+            }
+
+            if (validMoves.length === 0) {
+                checkersGameOver = true;
+                checkersStatusEl.innerHTML = "Red wins!";
+                return;
+            }
+
+            var move;
+            if (mode === "easy") {
+                move = validMoves[Math.floor(Math.random() * validMoves.length)];
+            } else if (mode === "medium") {
+                // Prefer capture moves
+                var captureMoves = [];
+                for (i = 0; i < validMoves.length; i++) {
+                    if (Math.abs(validMoves[i].to[0] - validMoves[i].from[0]) === 2) {
+                        captureMoves.push(validMoves[i]);
+                    }
+                }
+                move = captureMoves.length > 0 ? captureMoves[Math.floor(Math.random() * captureMoves.length)] : validMoves[Math.floor(Math.random() * validMoves.length)];
+            } else {
+                // Hard/Impossible: prefer captures with random variation
+                var bestScore = -9999;
+                for (i = 0; i < validMoves.length; i++) {
+                    var score = 0;
+                    if (Math.abs(validMoves[i].to[0] - validMoves[i].from[0]) === 2) score += 10;
+                    score += Math.random() * 5;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = validMoves[i];
+                    }
+                }
+            }
+
+            checkersMove(move.from[0], move.from[1], move.to[0], move.to[1]);
+            checkersRender();
+            checkersNextTurn(mode);
+        }
+
+        function checkersReset() {
+            checkersInit();
+        }
+
+        checkersInit();
+
+        // Initialize chat with welcome message
+        setTimeout(function() {
+            addChatMessage("Welcome to HyperZAI! Ask me anything, do math calculations, or search for information.", "bot");
+        }, 100);
     </script>
 </body>
 </html>

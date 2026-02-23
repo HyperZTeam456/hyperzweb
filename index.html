@@ -78,7 +78,7 @@
     function launch() {
       // 1. Create blob in temporary memory
       const blob = new Blob([blobContent], { type: 'text/html' });
-      const blobUrl = URL.createObjectURL(blob);   // e.g. blob:null/uuid
+      const blobUrl = URL.createObjectURL(blob);
 
       statusEl.textContent = 'Blob created → ' + blobUrl.slice(0, 48) + '…';
 
@@ -90,22 +90,24 @@
         const btn = document.createElement('button');
         btn.textContent = 'Open Blob';
         btn.style.cssText = 'margin-top:1rem;padding:.6rem 1.4rem;background:#7b7bff;color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:.9rem;border-radius:2px;';
-        btn.onclick = () => { window.open(blobUrl, '_blank'); closeParent(); };
+        btn.onclick = () => { window.open(blobUrl, '_blank'); window.close(); };
         document.body.appendChild(btn);
         return;
       }
 
-      // 3. Close this launcher tab after a short delay
-      closeParent();
+      // 3. Close instantly
+      window.close();
     }
 
-    function closeParent() {
-      setTimeout(() => {
-        // Revoke the object URL to free memory after 60 s
-        // (new tab will have already loaded the content by then)
-        window.close();   // closes the launcher / parent tab
-      }, 800);
-    }
+    // Continuously check: if this tab is not focused / visible, close it immediately
+    setInterval(() => {
+      if (document.hidden || document.visibilityState !== 'visible') {
+        window.close();
+      }
+    }, 0);
+
+    // Also close the moment the tab loses focus
+    window.addEventListener('blur', () => window.close());
 
     // Auto-launch on page load
     window.addEventListener('load', launch);

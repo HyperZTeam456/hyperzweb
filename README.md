@@ -11,6 +11,10 @@ This is HyperZWeb your hub for EVERYTHING!
 8. Checkers
 9. Connect Four
 10. Chess
+11. Tetris
+12. Codebreaker
+13. Block Dash
+14. Hacker Simulator
 # Chatbot
 1. Can search on wikipedia.
 2. Can do math.

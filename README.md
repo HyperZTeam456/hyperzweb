@@ -19,6 +19,7 @@ This is HyperZWeb your hub for Games, Privacy, and AI!
 16. Grid Maze
 17. Dune!
 18. Wordle
+19. Puyo Puyo
 # Chatbot
 1. Can search on wikipedia.
 2. Can do math.
